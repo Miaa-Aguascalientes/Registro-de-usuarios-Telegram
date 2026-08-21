@@ -6,7 +6,7 @@ import time as t
 from zoneinfo import ZoneInfo
 
 # Configuración de página
-st.set_page_config(layout="wide", page_title="Registro de usuarios", page_icon="https://www.miaa.mx/favicon.ico")
+st.set_page_config(layout="wide", page_title="Gestión de usuarios", page_icon="https://www.miaa.mx/favicon.ico")
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
@@ -66,13 +66,14 @@ def ejecutar_sql(query, params=None, max_retries=3):
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
-        padding-top: 1.5rem !important; 
+        padding-top: 2rem !important; 
         padding-bottom: 2rem !important;
-        background-color: #0B132B;
+        background-color: #070D1B;
         color: #FFFFFF;
+        max-width: 1200px;
     }
     body, [data-testid="stAppViewContainer"] {
-        background-color: #0B132B;
+        background-color: #070D1B;
         color: #FFFFFF;
     }
     .custom-title {
@@ -87,15 +88,34 @@ st.write("""<style>
         color: #8D99AE;
         text-align: center;
         font-size: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
     }
-    .card-container {
-        background-color: #1C2541;
-        border: 1px solid #3A506B;
+    .section-box {
+        background-color: #0F1A36;
+        border: 1px solid #1E293B;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .section-title {
+        color: #00E5FF;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .user-card {
+        background-color: #162247;
+        border: 1px solid #283861;
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     .stButton>button {
         background: linear-gradient(135deg, #0077B6, #00B4D8);
@@ -113,7 +133,7 @@ st.write("""<style>
     div[data-baseweb="input"] input, div[data-baseweb="base-input"] {
         background-color: #0B132B !important;
         color: #FFFFFF !important;
-        border-color: #3A506B !important;
+        border-color: #283861 !important;
         border-radius: 8px !important;
     }
     .footer-miaa {
@@ -121,24 +141,22 @@ st.write("""<style>
         color: #8D99AE;
         font-size: 0.85rem;
         margin-top: 3rem;
-        border-top: 1px solid #1C2541;
-        padding-top: 1rem;
+        border-top: 1px solid #162247;
+        padding-top: 1.5rem;
     }
 </style>""", unsafe_allow_html=True)
 
 # --- CABECERA ---
-col_h1, col_h2, col_h3 = st.columns([1, 2.5, 1]) 
+col_h1, col_h2, col_h3 = st.columns([1, 3, 1]) 
 with col_h2:
     st.markdown("""
-        <div style="text-align: center; margin-bottom: 10px;">
+        <div style="text-align: center; margin-bottom: 12px;">
             <img src="https://raw.githubusercontent.com/Miaa-Aguascalientes/Logos/38504978c8f77a4dac38ad476f74dbdee6af2cad/LogoMIAA.svg" 
                  style="width: 260px; height: auto; display: inline-block;">
         </div>
-        <h1 class="custom-title">Registro de usuarios</h1>
-        <p class="subtitle-miaa">Administra y registra nuevos usuarios del sistema</p>
+        <h1 class="custom-title">Gestión de Usuarios</h1>
+        <p class="subtitle-miaa">Administra, registra y edita los destinatarios del sistema de alertas</p>
     """, unsafe_allow_html=True)
-
-st.markdown("<hr style='border: 1px solid #1C2541; margin-bottom: 2rem;'>", unsafe_allow_html=True)
 
 # --- CARGA DE DATOS ---
 try:
@@ -146,67 +164,87 @@ try:
 except:
     df_destinatarios = pd.DataFrame()
 
-# --- FORMULARIO PARA AÑADIR DESTINATARIO ---
-with st.container():
-    st.markdown("""
-        <div class="card-container">
-            <h3 style="color: #00E5FF; margin-top: 0; font-size: 1.3rem;">➕ Añadir nuevo destinatario</h3>
-        </div>
-    """, unsafe_allow_html=True)
+# ==========================================
+# SECCIÓN 1: USUARIOS REGISTRADOS (Visualización)
+# ==========================================
+st.markdown('<div class="section-box">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">👥 Usuarios Registrados</div>', unsafe_allow_html=True)
+
+if not df_destinatarios.empty:
+    for _, row_user in df_destinatarios.iterrows():
+        estado_badge = '<span style="color: #00FF00; font-weight: 600;">● Activo</span>' if str(row_user['activo']).strip().lower() == 'si' else '<span style="color: #FF4D4D; font-weight: 600;">● Inactivo</span>'
+        st.markdown(f"""
+            <div class="user-card">
+                <div>
+                    <span style="font-size: 1.1rem; font-weight: bold; color: #FFFFFF;">👤 {row_user['nombre']}</span><br>
+                    <span style="color: #8D99AE; font-size: 0.9rem;">💬 ID: {row_user['chart_id']} &nbsp;|&nbsp; 🏢 {row_user['departamento']}</span>
+                </div>
+                <div>
+                    {estado_badge}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+else:
+    st.info("No se encontraron registros en Diccionario_telegram.")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# SECCIÓN 2: AÑADIR NUEVO DESTINATARIO
+# ==========================================
+st.markdown('<div class="section-box">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">➕ Añadir Nuevo Destinatario</div>', unsafe_allow_html=True)
+
+with st.form("form_nuevo_usuario_dinamico_unico"):
+    f_col1, f_col2, f_col3 = st.columns(3)
+    with f_col1:
+        nuevo_nombre = st.text_input("Nombre completo", key="input_nuevo_nombre")
+    with f_col2:
+        nuevo_chart = st.text_input("Chart ID (Telegram)", key="input_nuevo_chart")
+    with f_col3:
+        nuevo_depto = st.text_input("Departamento", value="Planeacion Tecnica", key="input_nuevo_depto")
     
-    # Expandible estilizado integrado
-    with st.expander("Desplegar formulario de registro", expanded=False):
-        with st.form("form_nuevo_usuario_dinamico_unico"):
-            f_col1, f_col2, f_col3 = st.columns(3)
-            with f_col1:
-                nuevo_nombre = st.text_input("Nombre completo", key="input_nuevo_nombre")
-            with f_col2:
-                nuevo_chart = st.text_input("Chart ID (Telegram)", key="input_nuevo_chart")
-            with f_col3:
-                nuevo_depto = st.text_input("Departamento", value="Planeacion Tecnica", key="input_nuevo_depto")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            btn_crear = st.form_submit_button("Guardar Usuario")
-            if btn_crear:
-                if nuevo_nombre and nuevo_chart:
-                    try:
-                        df_max_id = obtener_datos("SELECT MAX(CAST(id AS UNSIGNED)) as max_id FROM Diccionario_telegram")
-                        siguiente_id = 1
-                        if not df_max_id.empty and pd.notnull(df_max_id.iloc[0]['max_id']):
-                            siguiente_id = int(df_max_id.iloc[0]['max_id']) + 1
-                        
-                        nuevo_id_str = f"{siguiente_id:03d}"
+    st.markdown("<br>", unsafe_allow_html=True)
+    btn_crear = st.form_submit_button("Guardar Usuario")
+    if btn_crear:
+        if nuevo_nombre and nuevo_chart:
+            try:
+                df_max_id = obtener_datos("SELECT MAX(CAST(id AS UNSIGNED)) as max_id FROM Diccionario_telegram")
+                siguiente_id = 1
+                if not df_max_id.empty and pd.notnull(df_max_id.iloc[0]['max_id']):
+                    siguiente_id = int(df_max_id.iloc[0]['max_id']) + 1
+                
+                nuevo_id_str = f"{siguiente_id:03d}"
 
-                        ejecutar_sql(
-                            "INSERT INTO Diccionario_telegram (id, nombre, chart_id, activo, departamento) VALUES (:id, :nombre, :chart_id, 'Si', :depto)",
-                            {"id": nuevo_id_str, "nombre": nuevo_nombre, "chart_id": nuevo_chart, "depto": nuevo_depto}
-                        )
-                        st.success(f"Usuario {nuevo_nombre} añadido correctamente con ID {nuevo_id_str}.")
-                        st.rerun()
-                    except Exception as ex:
-                        st.error(f"Error al insertar el usuario: {ex}")
-                else:
-                    st.warning("Por favor completa los campos obligatorios (Nombre y Chart ID).")
+                ejecutar_sql(
+                    "INSERT INTO Diccionario_telegram (id, nombre, chart_id, activo, departamento) VALUES (:id, :nombre, :chart_id, 'Si', :depto)",
+                    {"id": nuevo_id_str, "nombre": nuevo_nombre, "chart_id": nuevo_chart, "depto": nuevo_depto}
+                )
+                st.success(f"Usuario {nuevo_nombre} añadido correctamente con ID {nuevo_id_str}.")
+                st.rerun()
+            except Exception as ex:
+                st.error(f"Error al insertar el usuario: {ex}")
+        else:
+            st.warning("Por favor completa los campos obligatorios (Nombre y Chart ID).")
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
-st.subheader("👥 Catálogo de Usuarios Registrados")
+# ==========================================
+# SECCIÓN 3: EDITAR Y ELIMINAR USUARIOS
+# ==========================================
+st.markdown('<div class="section-box">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">⚙️ Editar y Gestionar Usuarios</div>', unsafe_allow_html=True)
 
-# --- LISTADO DE USUARIOS EN TARJETAS ---
 if not df_destinatarios.empty:
     for idx, row_user in df_destinatarios.iterrows():
         with st.container():
             st.markdown(f"""
-                <div class="card-container" style="padding: 15px 20px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="font-size: 1.1rem; font-weight: bold; color: #FFFFFF;">👤 {row_user['nombre']}</span><br>
-                            <span style="color: #8D99AE; font-size: 0.9rem;">💬 ID: {row_user['chart_id']} &nbsp;|&nbsp; 🏢 {row_user['departamento']}</span>
-                        </div>
-                    </div>
+                <div style="background-color: #162247; border: 1px solid #283861; border-radius: 10px; padding: 12px 18px; margin-bottom: 10px;">
+                    <span style="font-weight: bold; color: #FFFFFF;">{row_user['nombre']}</span> <span style="color: #8D99AE; font-size: 0.85rem;">(ID: {row_user['chart_id']})</span>
                 </div>
             """, unsafe_allow_html=True)
             
-            cols_u = st.columns([6, 2, 2])
+            cols_u = st.columns([4, 2, 2])
+            with cols_u[0]:
+                st.markdown(f"<span style='color: #8D99AE; font-size: 0.9rem;'>Depto: {row_user['departamento']}</span>", unsafe_allow_html=True)
             with cols_u[1]:
                 actual_val = True if str(row_user['activo']).strip().lower() == 'si' else False
                 nuevo_estado = st.toggle("Activo", value=actual_val, key=f"toggle_user_{row_user['id']}_{idx}")
@@ -222,14 +260,15 @@ if not df_destinatarios.empty:
                 if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}"):
                     st.session_state.user_to_delete = row_user['id']
                     st.rerun()
+            st.markdown("<hr style='border: 0.5px solid #283861; margin: 10px 0;'>", unsafe_allow_html=True)
 else:
-    st.info("No se encontraron registros en Diccionario_telegram.")
+    st.info("No hay usuarios para editar.")
 
-# --- MODAL / SECCIÓN DE CONFIRMACIÓN DE ELIMINACIÓN ---
+# Manejo de confirmación de eliminación dentro de la sección 3
 if st.session_state.user_to_delete is not None:
     uid_Target = st.session_state.user_to_delete
     st.markdown(f"""
-        <div style="background-color: #3A1C1C; border: 1px solid #E63946; padding: 15px; border-radius: 8px; margin-top: 20px;">
+        <div style="background-color: #3A1C1C; border: 1px solid #E63946; padding: 15px; border-radius: 8px; margin-top: 15px;">
             <h4 style="color: #FF6B6B; margin-top: 0;">⚠️ Confirmación de Eliminación</h4>
             <p style="color: #FFFFFF;">Estás a punto de eliminar al usuario con ID: <b>{uid_Target}</b>. Esta acción no se puede deshacer.</p>
         </div>
@@ -255,6 +294,8 @@ if st.session_state.user_to_delete is not None:
         if st.button("Cancelar", key="btn_cancelar_eliminar_def"):
             st.session_state.user_to_delete = None
             st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --- PIE DE PÁGINA ---
 st.markdown("""
