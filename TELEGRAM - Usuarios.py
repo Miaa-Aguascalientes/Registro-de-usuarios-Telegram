@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS CON TEXTOS EN AZUL TURQUESA ---
+# --- ESTILOS CSS CON FORZADO TOTAL DE TEXTO ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -94,8 +94,11 @@ st.write("""<style>
         display: none !important;
     }
 
-    /* FORZAR TEXTO AZUL TURQUESA EN LOS PÁRRAFOS Y CONTENEDORES DE ST.RADIO */
-    div.row-widget.stRadio [data-testid="stMarkdownContainer"] p {
+    /* FORZAR AZUL TURQUESA EN CUALQUIER ELEMENTO DE TEXTO DENTRO DEL RADIO */
+    div.row-widget.stRadio div[role="radiogroup"] label span,
+    div.row-widget.stRadio div[role="radiogroup"] label p,
+    div.row-widget.stRadio [data-testid="stMarkdownContainer"] *,
+    div.row-widget.stRadio span {
         color: #00E5FF !important;
         -webkit-text-fill-color: #00E5FF !important;
         font-weight: 600 !important;
@@ -109,7 +112,9 @@ st.write("""<style>
     }
     
     /* Si la pestaña está activa, el texto cambia a color oscuro para contraste perfecto */
-    div.row-widget.stRadio > div > label[data-checked="true"] [data-testid="stMarkdownContainer"] p {
+    div.row-widget.stRadio > div > label[data-checked="true"] span,
+    div.row-widget.stRadio > div > label[data-checked="true"] p,
+    div.row-widget.stRadio > div > label[data-checked="true"] [data-testid="stMarkdownContainer"] * {
         color: #070D1B !important;
         -webkit-text-fill-color: #070D1B !important;
         font-weight: 700 !important;
