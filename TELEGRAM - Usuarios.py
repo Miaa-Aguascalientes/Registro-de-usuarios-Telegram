@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, text
-from datetime import datetime
 import time as t
 from zoneinfo import ZoneInfo
 
@@ -14,58 +13,43 @@ if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usu
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
-# --- CONEXIÓN A BASE DE DATOS (TIMEOUTS AMPLIADOS PARA RED MÓVIL) ---
+# --- CONEXIÓN A BASE DE DATOS ---
 def crear_nuevo_engine():
     return create_engine(
         st.secrets["databases"]["url_dic"],
         pool_pre_ping=True, 
         pool_recycle=1800, 
-        pool_timeout=25,  # Margen amplio para evitar timeouts en celular
-        connect_args={'connect_timeout': 25}
+        pool_timeout=30,
+        connect_args={'connect_timeout': 30}
     )
 
-# Usamos st.session_state para gestionar el engine y evitar que se quede cacheado en estado roto
 if 'db_engine' not in st.session_state:
     st.session_state.db_engine = crear_nuevo_engine()
 
-def obtener_datos(query, max_retries=3):
-    """Ejecuta consultas con reconexión automática si falla la red móvil."""
-    for intento in range(max_retries):
+def obtener_datos(query):
+    """Ejecuta consultas devolviendo tanto el dataframe como el error exacto si ocurre."""
+    try:
+        with st.session_state.db_engine.connect() as conn:
+            df = pd.read_sql(query, conn)
+            return df, None
+    except Exception as e:
         try:
+            st.session_state.db_engine.dispose()
+            st.session_state.db_engine = crear_nuevo_engine()
             with st.session_state.db_engine.connect() as conn:
-                return pd.read_sql(query, conn)
-        except Exception as e:
-            if intento < max_retries - 1:
-                try:
-                    st.session_state.db_engine.dispose()
-                except:
-                    pass
-                st.session_state.db_engine = crear_nuevo_engine()
-                t.sleep(2)
-            else:
-                st.warning(f"⚠️ Error de conexión con MIAA (Intento {intento + 1}): {e}")
-                return pd.DataFrame()
+                df = pd.read_sql(query, conn)
+                return df, None
+        except Exception as e2:
+            return pd.DataFrame(), str(e2)
 
-def ejecutar_sql(query, params=None, max_retries=3):
-    """Ejecuta sentencias SQL con control de errores y reintentos."""
-    for intento in range(max_retries):
-        try:
-            with st.session_state.db_engine.connect() as conn:
-                with conn.begin():
-                    conn.execute(text(query) if isinstance(query, str) else query, params or {})
-            return True
-        except Exception as e:
-            if intento < max_retries - 1:
-                try:
-                    st.session_state.db_engine.dispose()
-                except:
-                    pass
-                st.session_state.db_engine = crear_nuevo_engine()
-                t.sleep(2)
-            else:
-                raise e
+def ejecutar_sql(query, params=None):
+    """Ejecuta sentencias SQL de escritura/actualización."""
+    with st.session_state.db_engine.connect() as conn:
+        with conn.begin():
+            conn.execute(text(query) if isinstance(query, str) else query, params or {})
+    return True
 
-# --- ESTILOS CSS PROFESIONALES ---
+# --- ESTILOS CSS (FORZANDO BOTONES EN UNA SOLA LÍNEA) ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -80,6 +64,18 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
+    /* Contenedor Flexbox para alinear los 3 botones forzosamente en una línea */
+    .nav-container {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    .nav-container > div {
+        flex: 1;
+    }
+
     .user-card {
         background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
         border: 1px solid rgba(0, 229, 255, 0.15);
@@ -90,12 +86,6 @@ st.write("""<style>
         display: flex;
         align-items: center;
         justify-content: space-between;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .user-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 229, 255, 0.15);
-        border-color: rgba(0, 229, 255, 0.4);
     }
     .stButton>button {
         background: linear-gradient(135deg, #0077B6, #00E5FF);
@@ -105,14 +95,12 @@ st.write("""<style>
         font-weight: 700;
         padding: 0.5rem 0.2rem;
         font-size: 0.85rem;
-        transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         width: 100%;
         white-space: nowrap;
     }
     .stButton>button:hover {
         background: linear-gradient(135deg, #00E5FF, #90E0EF);
-        box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
         color: #070D1B;
     }
     div[data-baseweb="input"] input, div[data-baseweb="base-input"] {
@@ -131,7 +119,7 @@ st.write("""<style>
     }
 </style>""", unsafe_allow_html=True)
 
-# --- CABECERA: LOGOTIPO MIAA + TÍTULO ---
+# --- CABECERA ---
 st.markdown("""
     <div style="text-align: center; margin-bottom: 4px;">
         <img src="https://raw.githubusercontent.com/Miaa-Aguascalientes/Logos/38504978c8f77a4dac38ad476f74dbdee6af2cad/LogoMIAA.svg" 
@@ -144,42 +132,41 @@ with col_title_2:
     st.markdown("""
         <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1.5rem;">
             <h2 style="color: #00E5FF; margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">Gestión de Usuarios</h2>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="#00E5FF" style="filter: drop-shadow(0 0 8px rgba(0,229,255,0.4);">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.98-1.73 6.64-2.87 7.98-3.43 3.8-1.6 4.58-1.88 5.09-1.89.11 0 .37.03.54.17.14.12.18.28.2.4-.02.07-.02.2-.04.33z"/>
-            </svg>
         </div>
     """, unsafe_allow_html=True)
 
-# --- CARGA DE DATOS ---
-df_destinatarios = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
+# --- MENÚ DE NAVEGACIÓN (FORZADO EN UNA SOLA LÍNEA MEDIANTE HTML/CSS) ---
+st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+c_nav1, c_nav2, c_nav3 = st.columns(3)
 
-# --- MENÚ DE NAVEGACIÓN (3 BOTONES) ---
-col_b1, col_b2, col_b3 = st.columns(3)
-
-with col_b1:
+with c_nav1:
     if st.button("👥 U. Registrados", key="nav_btn_1", use_container_width=True):
         st.session_state.active_tab = "👥 Usuarios Registrados"
         st.rerun()
 
-with col_b2:
+with c_nav2:
     if st.button("➕ Añadir", key="nav_btn_2", use_container_width=True):
         st.session_state.active_tab = "➕ Añadir Nuevo"
         st.rerun()
 
-with col_b3:
+with c_nav3:
     if st.button("⚙️ Editar/Elim.", key="nav_btn_3", use_container_width=True):
         st.session_state.active_tab = "⚙️ Editar y Eliminar"
         st.rerun()
 
-st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# CONTENIDO DE LA PESTAÑA 1: USUARIOS REGISTRADOS
+# SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
 if st.session_state.active_tab == "👥 Usuarios Registrados":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
-    if not df_destinatarios.empty:
+    df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
+    
+    if error_db:
+        st.error(f"❌ Error al consultar la base de datos: {error_db}")
+    elif not df_destinatarios.empty:
         for _, row_user in df_destinatarios.iterrows():
             estado_badge = '<span style="color: #00FF66; font-weight: 700; text-shadow: 0 0 8px rgba(0,255,102,0.4);">● Activo</span>' if str(row_user['activo']).strip().lower() == 'si' else '<span style="color: #FF3366; font-weight: 700;">● Inactivo</span>'
             st.markdown(f"""
@@ -195,10 +182,10 @@ if st.session_state.active_tab == "👥 Usuarios Registrados":
                 </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("No se pudieron cargar los registros de la base de datos.")
+        st.info("La tabla 'Diccionario_telegram' está vacía o no devolvió registros.")
 
 # ==========================================
-# CONTENIDO DE LA PESTAÑA 2: AÑADIR NUEVO
+# SECCIÓN 2: AÑADIR NUEVO
 # ==========================================
 elif st.session_state.active_tab == "➕ Añadir Nuevo":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
@@ -217,7 +204,7 @@ elif st.session_state.active_tab == "➕ Añadir Nuevo":
         if btn_crear:
             if nuevo_nombre and nuevo_chart:
                 try:
-                    df_max_id = obtener_datos("SELECT MAX(CAST(id AS UNSIGNED)) as max_id FROM Diccionario_telegram")
+                    df_max_id, err = obtener_datos("SELECT MAX(CAST(id AS UNSIGNED)) as max_id FROM Diccionario_telegram")
                     siguiente_id = 1
                     if not df_max_id.empty and pd.notnull(df_max_id.iloc[0]['max_id']):
                         siguiente_id = int(df_max_id.iloc[0]['max_id']) + 1
@@ -229,6 +216,7 @@ elif st.session_state.active_tab == "➕ Añadir Nuevo":
                         {"id": nuevo_id_str, "nombre": nuevo_nombre, "chart_id": nuevo_chart, "depto": nuevo_depto}
                     )
                     st.success(f"¡Usuario {nuevo_nombre} añadido correctamente con ID {nuevo_id_str}!")
+                    t.sleep(1)
                     st.rerun()
                 except Exception as ex:
                     st.error(f"Error al insertar el usuario: {ex}")
@@ -236,12 +224,16 @@ elif st.session_state.active_tab == "➕ Añadir Nuevo":
                 st.warning("Por favor completa los campos obligatorios (Nombre y Chart ID).")
 
 # ==========================================
-# CONTENIDO DE LA PESTAÑA 3: EDITAR Y ELIMINAR
+# SECCIÓN 3: EDITAR Y ELIMINAR
 # ==========================================
 elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
-    if not df_destinatarios.empty:
+    df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
+    
+    if error_db:
+        st.error(f"❌ Error al consultar la base de datos: {error_db}")
+    elif not df_destinatarios.empty:
         for idx, row_user in df_destinatarios.iterrows():
             with st.container():
                 st.markdown(f"""
@@ -271,19 +263,18 @@ elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
                         st.rerun()
                 st.markdown("<hr style='border: 0.5px solid rgba(0,229,255,0.1); margin: 12px 0;'>", unsafe_allow_html=True)
     else:
-        st.info("No hay usuarios disponibles para editar o la conexión está inactiva.")
+        st.info("No hay usuarios disponibles para editar.")
 
-    # Manejo de confirmación de eliminación
     if st.session_state.user_to_delete is not None:
         uid_Target = st.session_state.user_to_delete
         st.markdown(f"""
             <div style="background: linear-gradient(135deg, #3A1C1C 0%, #2A0E0E 100%); border: 1px solid #FF3366; padding: 18px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 20px rgba(255,51,102,0.3);">
                 <h4 style="color: #FF4D6D; margin-top: 0;">⚠️ Advertencia de Eliminación Permanente</h4>
-                <p style="color: #FFFFFF;">Estás a punto de eliminar al usuario con ID: <b>{uid_Target}</b>. Esta acción no se puede deshacer.</p>
+                <p style="color: #FFFFFF;">Estás a punto de eliminar al usuario con ID: <b>{uid_Target}</b>.</p>
             </div>
         """, unsafe_allow_html=True)
         
-        confirm_text = st.text_input("Para confirmar, escribe la palabra requerida ('delete') en el siguiente campo:", key="input_confirm_delete")
+        confirm_text = st.text_input("Para confirmar, escribe 'delete':", key="input_confirm_delete")
         
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
@@ -291,14 +282,14 @@ elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
                 if confirm_text.strip().lower() == "delete":
                     try:
                         ejecutar_sql("DELETE FROM Diccionario_telegram WHERE id = :uid", {"uid": uid_Target})
-                        st.success("Registro eliminado correctamente de la base de datos.")
+                        st.success("Registro eliminado correctamente.")
                         st.session_state.user_to_delete = None
                         t.sleep(0.5)
                         st.rerun()
                     except Exception as ex:
-                        st.error(f"Error al eliminar de la base de datos: {ex}")
+                        st.error(f"Error al eliminar: {ex}")
                 else:
-                    st.error("La palabra ingresada no coincide. Escribe 'delete' para confirmar.")
+                    st.error("Escribe 'delete' para confirmar.")
         with c_btn2:
             if st.button("Cancelar", key="btn_cancelar_eliminar_def", use_container_width=True):
                 st.session_state.user_to_delete = None
