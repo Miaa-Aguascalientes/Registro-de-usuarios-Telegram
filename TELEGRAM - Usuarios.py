@@ -6,7 +6,7 @@ import time as t
 from zoneinfo import ZoneInfo
 
 # Configuración de página
-st.set_page_config(layout="wide", page_title="Gestión de usuarios", page_icon="https://www.miaa.mx/favicon.ico")
+st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegram", page_icon="https://www.miaa.mx/favicon.ico")
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
@@ -62,111 +62,117 @@ def ejecutar_sql(query, params=None, max_retries=3):
             else:
                 raise e
 
-# --- ESTILOS CSS PROFESIONALES (TEMA OSCURO MIAA) ---
+# --- ESTILOS CSS PROFESIONALES (TEMA OSCURO DINÁMICO MIAA) ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
-        padding-top: 2rem !important; 
+        padding-top: 0.5rem !important; 
         padding-bottom: 2rem !important;
-        background-color: #070D1B;
+        background: radial-gradient(circle at top center, #0F2042 0%, #070D1B 70%);
         color: #FFFFFF;
         max-width: 1200px;
     }
     body, [data-testid="stAppViewContainer"] {
-        background-color: #070D1B;
+        background: radial-gradient(circle at top center, #0F2042 0%, #070D1B 70%);
         color: #FFFFFF;
     }
-    .custom-title {
-        color: #00E5FF !important; 
-        font-size: 2.2rem; 
-        font-weight: 800; 
-        margin-bottom: 0px; 
-        text-align: center; 
-        letter-spacing: 0.5px;
-    }
-    .subtitle-miaa {
-        color: #8D99AE;
-        text-align: center;
-        font-size: 1rem;
-        margin-bottom: 2rem;
-    }
     .section-box {
-        background-color: #0F1A36;
-        border: 1px solid #1E293B;
+        background: linear-gradient(135deg, rgba(22, 34, 71, 0.8) 0%, rgba(15, 26, 54, 0.9) 100%);
+        border: 1px solid rgba(0, 229, 255, 0.2);
         border-radius: 16px;
         padding: 24px;
         margin-bottom: 24px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
     }
     .user-card {
-        background-color: #162247;
-        border: 1px solid #283861;
-        border-radius: 12px;
+        background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
+        border: 1px solid rgba(0, 229, 255, 0.15);
+        border-left: 4px solid #00E5FF;
+        border-radius: 10px;
         padding: 16px 20px;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 229, 255, 0.15);
+        border-color: rgba(0, 229, 255, 0.4);
     }
     .stButton>button {
-        background: linear-gradient(135deg, #0077B6, #00B4D8);
-        color: white;
+        background: linear-gradient(135deg, #0077B6, #00E5FF);
+        color: #070D1B;
         border: none;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 700;
         padding: 0.5rem 1rem;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
     }
     .stButton>button:hover {
-        background: linear-gradient(135deg, #00B4D8, #90E0EF);
-        box-shadow: 0 0 12px rgba(0, 180, 216, 0.5);
+        background: linear-gradient(135deg, #00E5FF, #90E0EF);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+        color: #070D1B;
     }
     div[data-baseweb="input"] input, div[data-baseweb="base-input"] {
-        background-color: #0B132B !important;
+        background-color: #070D1B !important;
         color: #FFFFFF !important;
-        border-color: #283861 !important;
+        border-color: rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
     }
-    /* Estilo de pestañas */
+    /* Estilo de pestañas vibrantes */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: #0F1A36;
+        gap: 10px;
+        background-color: rgba(15, 26, 54, 0.8);
         padding: 10px;
-        border-radius: 12px;
-        border: 1px solid #1E293B;
+        border-radius: 14px;
+        border: 1px solid rgba(0, 229, 255, 0.2);
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #162247;
-        border-radius: 8px;
+        border-radius: 10px;
         color: #8D99AE;
         font-weight: 600;
-        padding: 10px 20px;
-        border: none;
+        padding: 12px 24px;
+        border: 1px solid rgba(255,255,255,0.05);
+        transition: all 0.3s ease;
     }
     .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0077B6, #00B4D8) !important;
-        color: #FFFFFF !important;
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        color: #070D1B !important;
+        font-weight: 800 !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
     }
     .footer-miaa {
         text-align: center;
         color: #8D99AE;
         font-size: 0.85rem;
         margin-top: 3rem;
-        border-top: 1px solid #162247;
+        border-top: 1px solid rgba(0, 229, 255, 0.1);
         padding-top: 1.5rem;
     }
 </style>""", unsafe_allow_html=True)
 
-# --- CABECERA ---
-col_h1, col_h2, col_h3 = st.columns([1, 3, 1]) 
-with col_h2:
+# --- CABECERA: LOGOTIPO MIAA (MÁS CHICO Y ARRIBA) + TÍTULO CON ICONO DE TELEGRAM ---
+st.markdown("""
+    <div style="text-align: center; margin-bottom: 4px;">
+        <img src="https://raw.githubusercontent.com/Miaa-Aguascalientes/Logos/38504978c8f77a4dac38ad476f74dbdee6af2cad/LogoMIAA.svg" 
+             style="width: 150px; height: auto; display: inline-block; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
+    </div>
+""", unsafe_allow_html=True)
+
+col_title_1, col_title_2, col_title_3 = st.columns([1, 6, 1])
+with col_title_2:
     st.markdown("""
-        <div style="text-align: center; margin-bottom: 12px;">
-            <img src="https://raw.githubusercontent.com/Miaa-Aguascalientes/Logos/38504978c8f77a4dac38ad476f74dbdee6af2cad/LogoMIAA.svg" 
-                 style="width: 260px; height: auto; display: inline-block;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1.5rem;">
+            <h2 style="color: #00E5FF; margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">Gestión de Usuarios</h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="#00E5FF" style="filter: drop-shadow(0 0 8px rgba(0,229,255,0.4);">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.98-1.73 6.64-2.87 7.98-3.43 3.8-1.6 4.58-1.88 5.09-1.89.11 0 .37.03.54.17.14.12.18.28.2.4-.02.07-.02.2-.04.33z"/>
+            </svg>
         </div>
-        <h1 class="custom-title">Gestión de Usuarios</h1>
-        <p class="subtitle-miaa">Administra, registra y edita los destinatarios del sistema de alertas</p>
     """, unsafe_allow_html=True)
 
 # --- CARGA DE DATOS ---
@@ -187,16 +193,17 @@ tab_lista, tab_nuevo, tab_editar = st.tabs([
 # ==========================================
 with tab_lista:
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.subheader("👥 Listado de Destinatarios Activos")
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     if not df_destinatarios.empty:
         for _, row_user in df_destinatarios.iterrows():
-            estado_badge = '<span style="color: #00FF00; font-weight: 600;">● Activo</span>' if str(row_user['activo']).strip().lower() == 'si' else '<span style="color: #FF4D4D; font-weight: 600;">● Inactivo</span>'
+            estado_badge = '<span style="color: #00FF66; font-weight: 700; text-shadow: 0 0 8px rgba(0,255,102,0.4);">● Activo</span>' if str(row_user['activo']).strip().lower() == 'si' else '<span style="color: #FF3366; font-weight: 700;">● Inactivo</span>'
             st.markdown(f"""
                 <div class="user-card">
                     <div>
-                        <span style="font-size: 1.1rem; font-weight: bold; color: #FFFFFF;">👤 {row_user['nombre']}</span><br>
-                        <span style="color: #8D99AE; font-size: 0.9rem;">💬 ID: {row_user['chart_id']} &nbsp;|&nbsp; 🏢 {row_user['departamento']}</span>
+                        <span style="font-size: 1.15rem; font-weight: bold; color: #FFFFFF;">👤 {row_user['nombre']}</span><br>
+                        <span style="color: #00E5FF; font-size: 0.85rem; font-family: monospace;">ID Telegram: {row_user['chart_id']}</span> &nbsp;|&nbsp; 
+                        <span style="color: #8D99AE; font-size: 0.9rem;">🏢 {row_user['departamento']}</span>
                     </div>
                     <div>
                         {estado_badge}
@@ -212,7 +219,7 @@ with tab_lista:
 # ==========================================
 with tab_nuevo:
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.subheader("➕ Registro de Nuevo Destinatario")
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
         f_col1, f_col2, f_col3 = st.columns(3)
@@ -224,7 +231,7 @@ with tab_nuevo:
             nuevo_depto = st.text_input("Departamento", value="Planeacion Tecnica", key="input_nuevo_depto")
         
         st.markdown("<br>", unsafe_allow_html=True)
-        btn_crear = st.form_submit_button("Guardar Usuario")
+        btn_crear = st.form_submit_button("🚀 Guardar Nuevo Usuario")
         if btn_crear:
             if nuevo_nombre and nuevo_chart:
                 try:
@@ -239,7 +246,7 @@ with tab_nuevo:
                         "INSERT INTO Diccionario_telegram (id, nombre, chart_id, activo, departamento) VALUES (:id, :nombre, :chart_id, 'Si', :depto)",
                         {"id": nuevo_id_str, "nombre": nuevo_nombre, "chart_id": nuevo_chart, "depto": nuevo_depto}
                     )
-                    st.success(f"Usuario {nuevo_nombre} añadido correctamente con ID {nuevo_id_str}.")
+                    st.success(f"¡Usuario {nuevo_nombre} añadido correctamente con ID {nuevo_id_str}!")
                     st.rerun()
                 except Exception as ex:
                     st.error(f"Error al insertar el usuario: {ex}")
@@ -252,20 +259,21 @@ with tab_nuevo:
 # ==========================================
 with tab_editar:
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.subheader("⚙️ Control de Edición y Eliminación")
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     if not df_destinatarios.empty:
         for idx, row_user in df_destinatarios.iterrows():
             with st.container():
                 st.markdown(f"""
-                    <div style="background-color: #162247; border: 1px solid #283861; border-radius: 10px; padding: 12px 18px; margin-bottom: 10px;">
-                        <span style="font-weight: bold; color: #FFFFFF;">{row_user['nombre']}</span> <span style="color: #8D99AE; font-size: 0.85rem;">(ID: {row_user['chart_id']})</span>
+                    <div style="background: linear-gradient(90deg, #162247 0%, #0F1A36 100%); border: 1px solid rgba(0,229,255,0.15); border-radius: 10px; padding: 12px 18px; margin-bottom: 8px;">
+                        <span style="font-weight: bold; color: #FFFFFF; font-size: 1.05rem;">{row_user['nombre']}</span> 
+                        <span style="color: #00E5FF; font-size: 0.85rem; font-family: monospace;">(ID: {row_user['chart_id']})</span>
                     </div>
                 """, unsafe_allow_html=True)
                 
                 cols_u = st.columns([4, 2, 2])
                 with cols_u[0]:
-                    st.markdown(f"<span style='color: #8D99AE; font-size: 0.9rem;'>Depto: {row_user['departamento']}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color: #8D99AE; font-size: 0.9rem;'>Depto: <b>{row_user['departamento']}</b></span>", unsafe_allow_html=True)
                 with cols_u[1]:
                     actual_val = True if str(row_user['activo']).strip().lower() == 'si' else False
                     nuevo_estado = st.toggle("Activo", value=actual_val, key=f"toggle_user_{row_user['id']}_{idx}")
@@ -281,16 +289,16 @@ with tab_editar:
                     if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}"):
                         st.session_state.user_to_delete = row_user['id']
                         st.rerun()
-                st.markdown("<hr style='border: 0.5px solid #283861; margin: 10px 0;'>", unsafe_allow_html=True)
+                st.markdown("<hr style='border: 0.5px solid rgba(0,229,255,0.1); margin: 12px 0;'>", unsafe_allow_html=True)
     else:
-        st.info("No hay usuarios para editar.")
+        st.info("No hay usuarios disponibles para editar.")
 
-    # Manejo de confirmación de eliminación
+    # Manejo de confirmación de eliminación con estilo mejorado
     if st.session_state.user_to_delete is not None:
         uid_Target = st.session_state.user_to_delete
         st.markdown(f"""
-            <div style="background-color: #3A1C1C; border: 1px solid #E63946; padding: 15px; border-radius: 8px; margin-top: 15px;">
-                <h4 style="color: #FF6B6B; margin-top: 0;">⚠️ Confirmación de Eliminación</h4>
+            <div style="background: linear-gradient(135deg, #3A1C1C 0%, #2A0E0E 100%); border: 1px solid #FF3366; padding: 18px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 20px rgba(255,51,102,0.3);">
+                <h4 style="color: #FF4D6D; margin-top: 0;">⚠️ Advertencia de Eliminación Permanente</h4>
                 <p style="color: #FFFFFF;">Estás a punto de eliminar al usuario con ID: <b>{uid_Target}</b>. Esta acción no se puede deshacer.</p>
             </div>
         """, unsafe_allow_html=True)
@@ -303,14 +311,14 @@ with tab_editar:
                 if confirm_text.strip().lower() == "delete":
                     try:
                         ejecutar_sql("DELETE FROM Diccionario_telegram WHERE id = :uid", {"uid": uid_Target})
-                        st.success("Registro eliminado correctamente.")
+                        st.success("Registro eliminado correctamente de la base de datos.")
                         st.session_state.user_to_delete = None
                         t.sleep(0.5)
                         st.rerun()
                     except Exception as ex:
                         st.error(f"Error al eliminar de la base de datos: {ex}")
                 else:
-                    st.error("La palabra ingresada no coincide. Inténtalo de nuevo.")
+                    st.error("La palabra ingresada no coincide. Escribe 'delete' para confirmar.")
         with c_btn2:
             if st.button("Cancelar", key="btn_cancelar_eliminar_def"):
                 st.session_state.user_to_delete = None
