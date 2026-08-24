@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS (FORZANDO BOTONES EN UNA SOLA LÍNEA) ---
+# --- ESTILOS CSS ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -64,16 +64,38 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* Contenedor Flexbox para alinear los 3 botones forzosamente en una línea */
-    .nav-container {
+    /* Estilo profesional para convertir el radio button en una barra de pestañas horizontales fija */
+    div.row-widget.stRadio > div {
         display: flex;
         flex-direction: row;
+        justify-content: center;
+        background: rgba(15, 32, 66, 0.8);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 12px;
+        padding: 6px;
         gap: 10px;
-        width: 100%;
-        margin-bottom: 20px;
     }
-    .nav-container > div {
+    div.row-widget.stRadio > div > label {
+        background: linear-gradient(135deg, #1A2A56 0%, #162247 100%);
+        border: 1px solid rgba(0, 229, 255, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         flex: 1;
+        text-align: center;
+        cursor: pointer;
+    }
+    div.row-widget.stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        color: #070D1B !important;
+        border-color: #00E5FF !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    }
+    /* Ocultar el círculo nativo feo del radio button */
+    div.row-widget.stRadio input[type="radio"] {
+        display: none;
     }
 
     .user-card {
@@ -135,26 +157,23 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN (FORZADO EN UNA SOLA LÍNEA MEDIANTE HTML/CSS) ---
-st.markdown('<div class="nav-container">', unsafe_allow_html=True)
-c_nav1, c_nav2, c_nav3 = st.columns(3)
+# --- MENÚ DE NAVEGACIÓN HORIZONTAL INFALIBLE ---
+opciones_menu = ["👥 Usuarios Registrados", "➕ Añadir Nuevo", "⚙️ Editar y Eliminar"]
 
-with c_nav1:
-    if st.button("👥 U. Registrados", key="nav_btn_1", use_container_width=True):
-        st.session_state.active_tab = "👥 Usuarios Registrados"
-        st.rerun()
+# Usamos st.radio con horizontal=True para garantizar una única fila horizontal que no se rompe nunca
+seleccion_tab = st.radio(
+    "Navegación", 
+    options=opciones_menu, 
+    index=opciones_menu.index(st.session_state.active_tab) if st.session_state.active_tab in opciones_menu else 0,
+    horizontal=True,
+    label_visibility="collapsed"
+)
 
-with c_nav2:
-    if st.button("➕ Añadir", key="nav_btn_2", use_container_width=True):
-        st.session_state.active_tab = "➕ Añadir Nuevo"
-        st.rerun()
+if seleccion_tab != st.session_state.active_tab:
+    st.session_state.active_tab = seleccion_tab
+    st.rerun()
 
-with c_nav3:
-    if st.button("⚙️ Editar/Elim.", key="nav_btn_3", use_container_width=True):
-        st.session_state.active_tab = "⚙️ Editar y Eliminar"
-        st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 
 # ==========================================
 # SECCIÓN 1: USUARIOS REGISTRADOS
