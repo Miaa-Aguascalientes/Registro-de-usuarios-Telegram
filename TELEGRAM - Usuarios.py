@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS CON FORZADO TOTAL DE TEXTO ---
+# --- ESTILOS CSS CON TEXTOS DE INPUTS EN BLANCO BRILLANTE ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -118,6 +118,15 @@ st.write("""<style>
         color: #070D1B !important;
         -webkit-text-fill-color: #070D1B !important;
         font-weight: 700 !important;
+    }
+
+    /* FORZAR ETIQUETAS DE INPUTS Y TEXTOS DE FORMULARIOS A BLANCO BRILLANTE */
+    .stTextInput label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stNumberInput label, 
+    [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] span, [data-testid="stForm"] label {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
     }
 
     .user-card {
