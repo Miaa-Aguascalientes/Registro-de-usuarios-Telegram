@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS CORREGIDOS PARA FORZAR TEXTO BLANCO EN ST.RADIO ---
+# --- ESTILOS CSS CORREGIDOS ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -64,7 +64,7 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* Estilo profesional para convertir el radio button en una barra de pestañas horizontales */
+    /* Convertir st.radio horizontal en pestañas */
     div.row-widget.stRadio > div {
         display: flex;
         flex-direction: row;
@@ -86,14 +86,20 @@ st.write("""<style>
         cursor: pointer;
     }
     
-    /* FORZAR TEXTO BLANCO BRILLANTE Y ELIMINAR OPACIDAD EN MÓVILES */
-    div.row-widget.stRadio div[role="radiogroup"] label p,
-    div.row-widget.stRadio div[role="radiogroup"] label span,
-    div.row-widget.stRadio label div {
+    /* OCULTAR COMPLETAMENTE LOS CÍRCULOS NATIVOS DE RADIO */
+    div.row-widget.stRadio input[type="radio"] {
+        display: none !important;
+    }
+    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child {
+        display: none !important;
+    }
+
+    /* FORZAR TEXTO BLANCO Y BRILLANTE EN LOS PÁRRAFOS Y CONTENEDORES DE ST.RADIO */
+    div.row-widget.stRadio [data-testid="stMarkdownContainer"] p {
         color: #FFFFFF !important;
-        opacity: 1 !important;
         -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 600 !important;
+        opacity: 1 !important;
     }
 
     div.row-widget.stRadio > div > label[data-checked="true"] {
@@ -102,20 +108,11 @@ st.write("""<style>
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
     
-    /* Si está seleccionado, el texto dentro pasa a color oscuro para contraste perfecto */
-    div.row-widget.stRadio > div > label[data-checked="true"] p,
-    div.row-widget.stRadio > div > label[data-checked="true"] span {
+    /* Si la pestaña está activa, el texto cambia a color oscuro para contraste perfecto */
+    div.row-widget.stRadio > div > label[data-checked="true"] [data-testid="stMarkdownContainer"] p {
         color: #070D1B !important;
         -webkit-text-fill-color: #070D1B !important;
         font-weight: 700 !important;
-    }
-    
-    /* Ocultar círculos nativos */
-    div.row-widget.stRadio input {
-        display: none !important;
-    }
-    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child {
-        display: none !important;
     }
 
     .user-card {
@@ -184,7 +181,7 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN HORIZONTAL (ST.RADIO ORIGINAL) ---
+# --- MENÚ DE NAVEGACIÓN HORIZONTAL ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
 
 seleccion_tab = st.radio(
