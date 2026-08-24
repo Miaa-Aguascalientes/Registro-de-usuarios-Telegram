@@ -64,6 +64,19 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
+    /* ANular el apilamiento automático de Streamlit en dispositivos móviles o pantallas angostas */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        width: auto !important;
+    }
+
     /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
     .stTextInput label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stNumberInput label, 
     [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] span, [data-testid="stForm"] label {
@@ -139,28 +152,10 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN AUTOAJUSTABLE EN 3 COLUMNAS FLEXIBLES ---
+# --- MENÚ DE NAVEGACIÓN EN 3 COLUMNAS HORIZONTALES FORZADAS ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
-
-# Contenedor flex en HTML para repartir el ancho equitativamente y evitar que se apilen
-cols_html = '<div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">'
-for op in opciones_menu:
-    is_active = (st.session_state.active_tab == op)
-    if is_active:
-        cols_html += f"""
-            <div style="flex: 1; background: linear-gradient(135deg, #0077B6, #00E5FF); border: 1px solid #00E5FF; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);">
-                <span style="color: #070D1B !important; font-weight: 700; font-size: 0.95rem; white-space: nowrap;">{op}</span>
-            </div>
-        """
-    else:
-        # Usamos un botón transparente estilizado o simulamos el clic mediante enlaces/botones de streamlit
-        # Como necesitamos los botones interactivos de Streamlit, usamos st.columns pero asegurando el ancho flexible:
-        pass
-
-cols_html += '</div>'
-
-# Implementación exacta con st.columns aplicando proporciones idénticas garantizadas por CSS
 cols_menu = st.columns(3)
+
 for i, op in enumerate(opciones_menu):
     with cols_menu[i]:
         is_active = (st.session_state.active_tab == op)
