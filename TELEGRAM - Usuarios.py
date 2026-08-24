@@ -80,39 +80,38 @@ st.write("""<style>
         border: 1px solid rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
         padding: 8px 18px !important;
-        color: #FFFFFF !important;
-        font-weight: 700 !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         flex: 1;
         text-align: center;
         cursor: pointer;
     }
-    div.row-widget.stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        color: #070D1B !important;
-        border-color: #00E5FF !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
-    }
     
-    /* FORZAR BLANCO BRILLANTE ABSOLUTO EN TEXTOS DEL RADIO (Móvil y Escritorio) */
+    /* FORZAR BLANCO PURO EXTREMO EN TODOS LOS TEXTOS DEL MENÚ MÓVIL Y ESCRITORIO */
     div.row-widget.stRadio label,
     div.row-widget.stRadio label span,
     div.row-widget.stRadio label p,
     div.row-widget.stRadio div,
+    div.row-widget.stRadio [data-testid="stMarkdownContainer"],
     div.row-widget.stRadio [data-testid="stMarkdownContainer"] p {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
         opacity: 1 !important;
     }
     
-    /* Excepción si la pestaña está seleccionada para que el texto haga contraste oscuro si el fondo es brillante */
+    /* Estado seleccionado: fondo brillante y texto oscuro de alto contraste */
+    div.row-widget.stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        border-color: #00E5FF !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    }
     div.row-widget.stRadio > div > label[data-checked="true"] span,
-    div.row-widget.stRadio > div > label[data-checked="true"] p {
+    div.row-widget.stRadio > div > label[data-checked="true"] p,
+    div.row-widget.stRadio > div > label[data-checked="true"] div {
         color: #070D1B !important;
         -webkit-text-fill-color: #070D1B !important;
     }
 
-    /* Ocultar por completo los círculos nativos y sus contenedores de los inputs de radio */
+    /* Ocultar por completo los círculos nativos y contenedores del input */
     div.row-widget.stRadio input {
         display: none !important;
     }
