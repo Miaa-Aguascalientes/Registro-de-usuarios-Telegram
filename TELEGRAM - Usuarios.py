@@ -123,13 +123,14 @@ st.write("""<style>
         border-color: rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
     }
-    /* Estilo de pestañas vibrantes */
+    /* Estilo de pestañas vibrantes (Sin contenedor exterior ni bordes sobrantes) */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
-        background-color: rgba(15, 26, 54, 0.8);
-        padding: 10px;
-        border-radius: 14px;
-        border: 1px solid rgba(0, 229, 255, 0.2);
+        background-color: transparent;
+        padding: 0px;
+        border-radius: 0px;
+        border: none;
+        margin-bottom: 20px;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #162247;
