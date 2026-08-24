@@ -3,7 +3,6 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 import time as t
 from zoneinfo import ZoneInfo
-import streamlit.components.v1 as components
 
 # Configuración de página
 st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegram", page_icon="https://www.miaa.mx/favicon.ico")
@@ -50,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS Y JS DE CORRECCIÓN ---
+# --- ESTILOS CSS ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -64,41 +63,6 @@ st.write("""<style>
         background: radial-gradient(circle at top center, #0F2042 0%, #070D1B 70%);
         color: #FFFFFF;
     }
-    
-    /* Estilo profesional para convertir el radio button en una barra de pestañas horizontales */
-    div.row-widget.stRadio > div {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        background: rgba(15, 32, 66, 0.8);
-        border: 1px solid rgba(0, 229, 255, 0.2);
-        border-radius: 12px;
-        padding: 5px;
-        gap: 10px;
-    }
-    div.row-widget.stRadio > div > label {
-        background: linear-gradient(135deg, #1A2A56 0%, #162247 100%);
-        border: 1px solid rgba(0, 229, 255, 0.3) !important;
-        border-radius: 8px !important;
-        padding: 8px 18px !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        flex: 1;
-        text-align: center;
-        cursor: pointer;
-    }
-    div.row-widget.stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        border-color: #00E5FF !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
-    }
-    
-    /* Ocultar círculos nativos */
-    div.row-widget.stRadio input {
-        display: none !important;
-    }
-    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child {
-        display: none !important;
-    }
 
     .user-card {
         background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
@@ -111,6 +75,8 @@ st.write("""<style>
         align-items: center;
         justify-content: space-between;
     }
+    
+    /* Botones generales de acción */
     .stButton>button {
         background: linear-gradient(135deg, #0077B6, #00E5FF);
         color: #070D1B;
@@ -128,6 +94,7 @@ st.write("""<style>
         color: #070D1B;
     }
     
+    /* Forzar texto en blanco brillante absoluto en todos los inputs de texto */
     div[data-baseweb="input"] input, 
     div[data-baseweb="base-input"] input, 
     input[type="text"] {
@@ -149,31 +116,6 @@ st.write("""<style>
     }
 </style>""", unsafe_allow_html=True)
 
-# Script JS para forzar color blanco brillante en los textos del menú móvil sin excepción
-components.html("""
-<script>
-    const doc = window.parent.document;
-    function fixMobileRadioText() {
-        const labels = doc.querySelectorAll('div.row-widget.stRadio label');
-        labels.forEach(label => {
-            const isChecked = label.getAttribute('data-checked') === 'true';
-            const paragraphs = label.querySelectorAll('p, span, div');
-            paragraphs.forEach(el => {
-                el.style.setProperty('opacity', '1', 'important');
-                if (isChecked) {
-                    el.style.setProperty('color', '#070D1B', 'important');
-                    el.style.setProperty('-webkit-text-fill-color', '#070D1B', 'important');
-                } else {
-                    el.style.setProperty('color', '#FFFFFF', 'important');
-                    el.style.setProperty('-webkit-text-fill-color', '#FFFFFF', 'important');
-                }
-            });
-        });
-    }
-    setInterval(fixMobileRadioText, 200);
-</script>
-""", height=0)
-
 # --- CABECERA ---
 st.markdown("""
     <div style="text-align: center; margin-bottom: 0px;">
@@ -191,24 +133,42 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN HORIZONTAL ---
-opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
+# --- MENÚ DE NAVEGACIÓN BASADO EN BOTONES (100% INMUNES AL GRIS MÓVIL) ---
+st.markdown("<br>", unsafe_allow_html=True)
+m_col1, m_col2, m_col3 = st.columns(3)
 
-seleccion_tab = st.radio(
-    "Navegación", 
-    options=opciones_menu, 
-    index=opciones_menu.index(st.session_state.active_tab) if st.session_state.active_tab in opciones_menu else 0,
-    horizontal=True,
-    label_visibility="collapsed"
-)
+with m_col1:
+    is_active_1 = st.session_state.active_tab == "👥 Usuarios"
+    bg_1 = "linear-gradient(135deg, #0077B6, #00E5FF)" if is_active_1 else "linear-gradient(135deg, #1A2A56 0%, #162247 100%)"
+    color_1 = "#070D1B" if is_active_1 else "#FFFFFF"
+    shadow_1 = "0 0 15px rgba(0, 229, 255, 0.5)" if is_active_1 else "0 4px 10px rgba(0,0,0,0.3)"
+    
+    st.markdown(f"""
+        <div style="width: 100%;">
+    """, unsafe_allow_html=True)
+    if st.button("👥 Usuarios", use_container_width=True, key="nav_btn_1"):
+        if st.session_state.active_tab != "👥 Usuarios":
+            st.session_state.active_tab = "👥 Usuarios"
+            st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
-if seleccion_tab != st.session_state.active_tab:
-    st.session_state.active_tab = seleccion_tab
-    st.rerun()
+with m_col2:
+    is_active_2 = st.session_state.active_tab == "➕ Añadir"
+    if st.button("➕ Añadir", use_container_width=True, key="nav_btn_2"):
+        if st.session_state.active_tab != "➕ Añadir":
+            st.session_state.active_tab = "➕ Añadir"
+            st.rerun()
 
-# Línea azul brillante pegada justo debajo de los botones de navegación
+with m_col3:
+    is_active_3 = st.session_state.active_tab == "⚙️ Editar"
+    if st.button("⚙️ Editar", use_container_width=True, key="nav_btn_3"):
+        if st.session_state.active_tab != "⚙️ Editar":
+            st.session_state.active_tab = "⚙️ Editar"
+            st.rerun()
+
+# Línea azul brillante debajo de la barra de navegación
 st.markdown("""
-    <div style="margin-top: 4px; margin-bottom: 12px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
+    <div style="margin-top: 12px; margin-bottom: 16px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
 """, unsafe_allow_html=True)
 
 # ==========================================
