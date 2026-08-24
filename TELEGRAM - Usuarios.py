@@ -67,7 +67,7 @@ def ejecutar_sql(query, params=None, max_retries=2):
             else:
                 raise e
 
-# --- ESTILOS CSS PROFESIONALES (BOTONES MÁS JUNTOS Y COMPACTOS) ---
+# --- ESTILOS CSS LIMPIOS Y ROBUSTOS ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -82,21 +82,6 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* FORZAR 3 COLUMNAS JUNTAS Y COMPACTAS EN MÓVIL Y PC */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 4px !important; /* Espacio reducido entre columnas */
-    }
-    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-        width: 33.333% !important;
-        flex: 1 1 33.333% !important;
-        min-width: 0 !important;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-    }
-
     .user-card {
         background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
         border: 1px solid rgba(0, 229, 255, 0.15);
@@ -120,14 +105,12 @@ st.write("""<style>
         border: none;
         border-radius: 8px;
         font-weight: 700;
-        padding: 0.4rem 0.1rem;
-        font-size: 0.8rem;
+        padding: 0.5rem 0.2rem;
+        font-size: 0.85rem;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         width: 100%;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
     .stButton>button:hover {
         background: linear-gradient(135deg, #00E5FF, #90E0EF);
@@ -172,21 +155,21 @@ with col_title_2:
 # --- CARGA DE DATOS ---
 df_destinatarios = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
 
-# --- 3 BOTONES EN 3 COLUMNAS JUNTAS Y COMPACTAS ---
+# --- MENÚ DE NAVEGACIÓN (3 BOTONES EQUILIBRADOS) ---
 col_b1, col_b2, col_b3 = st.columns(3)
 
 with col_b1:
-    if st.button("👥 U. Registrados", key="nav_btn_1"):
+    if st.button("👥 U. Registrados", key="nav_btn_1", use_container_width=True):
         st.session_state.active_tab = "👥 Usuarios Registrados"
         st.rerun()
 
 with col_b2:
-    if st.button("➕ Añadir", key="nav_btn_2"):
+    if st.button("➕ Añadir", key="nav_btn_2", use_container_width=True):
         st.session_state.active_tab = "➕ Añadir Nuevo"
         st.rerun()
 
 with col_b3:
-    if st.button("⚙️ Editar/Elim.", key="nav_btn_3"):
+    if st.button("⚙️ Editar/Elim.", key="nav_btn_3", use_container_width=True):
         st.session_state.active_tab = "⚙️ Editar y Eliminar"
         st.rerun()
 
@@ -285,7 +268,7 @@ elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
                         except Exception as ex:
                             st.error(f"Error al actualizar: {ex}")
                 with cols_u[2]:
-                    if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}"):
+                    if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}", use_container_width=True):
                         st.session_state.user_to_delete = row_user['id']
                         st.rerun()
                 st.markdown("<hr style='border: 0.5px solid rgba(0,229,255,0.1); margin: 12px 0;'>", unsafe_allow_html=True)
@@ -306,7 +289,7 @@ elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
         
         c_btn1, c_btn2 = st.columns(2)
         with c_btn1:
-            if st.button("Sí, confirmar eliminación", type="primary", key="btn_ejecutar_eliminar_def"):
+            if st.button("Sí, confirmar eliminación", type="primary", key="btn_ejecutar_eliminar_def", use_container_width=True):
                 if confirm_text.strip().lower() == "delete":
                     try:
                         ejecutar_sql("DELETE FROM Diccionario_telegram WHERE id = :uid", {"uid": uid_Target})
@@ -319,7 +302,7 @@ elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
                 else:
                     st.error("La palabra ingresada no coincide. Escribe 'delete' para confirmar.")
         with c_btn2:
-            if st.button("Cancelar", key="btn_cancelar_eliminar_def"):
+            if st.button("Cancelar", key="btn_cancelar_eliminar_def", use_container_width=True):
                 st.session_state.user_to_delete = None
                 st.rerun()
 
