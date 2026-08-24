@@ -94,12 +94,15 @@ st.write("""<style>
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
     
-    /* Ocultar por completo los círculos de radio nativos de Streamlit para evitar artefactos visuales */
-    div.row-widget.stRadio input[type="radio"],
-    div.row-widget.stRadio div[data-testid="stMarkdownContainer"] p,
-    div.row-widget.stRadio span {
-        /* Permite ocultar inputs nativos de selección sin romper los textos */
+    /* Forzar que los textos dentro del radio button sean estrictamente blancos brillantes */
+    div.row-widget.stRadio label p,
+    div.row-widget.stRadio span,
+    div.row-widget.stRadio div[data-testid="stMarkdownContainer"] p {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
     }
+    
+    /* Ocultar por completo los círculos y contenedores de los inputs nativos de radio */
     div.row-widget.stRadio input {
         display: none !important;
     }
