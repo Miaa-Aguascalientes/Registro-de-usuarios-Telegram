@@ -123,21 +123,15 @@ st.write("""<style>
         border-color: rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
     }
-    /* Estilo de pestañas vibrantes (Sin contenedor exterior, ni bordes, ni fondo en la barra de pestañas) */
+    
+    /* Corrección limpia para las pestañas de Streamlit */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
-        background-color: transparent !important;
-        padding: 0px !important;
-        border-radius: 0px !important;
-        border: none !important;
-        box-shadow: none !important;
+        background-color: transparent;
         margin-bottom: 20px;
     }
-    div[data-baseweb="tab-highlight"] {
+    .stTabs [data-baseweb="tab-border"] {
         background-color: transparent !important;
-    }
-    div[data-baseweb="tab-border"] {
-        display: none !important;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #162247;
@@ -154,6 +148,7 @@ st.write("""<style>
         font-weight: 800 !important;
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
     }
+
     .footer-miaa {
         text-align: center;
         color: #8D99AE;
