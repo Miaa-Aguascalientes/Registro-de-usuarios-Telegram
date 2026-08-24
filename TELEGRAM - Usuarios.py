@@ -123,14 +123,21 @@ st.write("""<style>
         border-color: rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
     }
-    /* Estilo de pestañas vibrantes (Sin contenedor exterior ni bordes sobrantes) */
+    /* Estilo de pestañas vibrantes (Sin contenedor exterior, ni bordes, ni fondo en la barra de pestañas) */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
-        background-color: transparent;
-        padding: 0px;
-        border-radius: 0px;
-        border: none;
+        background-color: transparent !important;
+        padding: 0px !important;
+        border-radius: 0px !important;
+        border: none !important;
+        box-shadow: none !important;
         margin-bottom: 20px;
+    }
+    div[data-baseweb="tab-highlight"] {
+        background-color: transparent !important;
+    }
+    div[data-baseweb="tab-border"] {
+        display: none !important;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #162247;
@@ -332,4 +339,4 @@ st.markdown("""
     <div class="footer-miaa">
         🔒 Política de privacidad &nbsp;&bull;&nbsp; © 2026 MIAA. Todos los derechos reservados.
     </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=WebResponse := None)
