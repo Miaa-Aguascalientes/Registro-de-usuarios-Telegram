@@ -139,24 +139,22 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN PERSONALIZADO (BLANCO BRILLANTE Y CONTROL TOTAL) ---
+# --- MENÚ DE NAVEGACIÓN EN 3 COLUMNAS EXACTAS ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
+cols_menu = st.columns(3)
 
-# Creamos columnas para renderizar los botones de navegación de forma idéntica
-cols_menu = st.columns(len(opciones_menu))
 for i, op in enumerate(opciones_menu):
     with cols_menu[i]:
         is_active = (st.session_state.active_tab == op)
         if is_active:
-            # Estilo activo (fondo turquesa, texto oscuro contrastado)
-            btn_html = f"""
+            # Estilo para la pestaña seleccionada (activa)
+            st.markdown(f"""
                 <div style="background: linear-gradient(135deg, #0077B6, #00E5FF); border: 1px solid #00E5FF; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);">
-                    <span style="color: #070D1B !important; font-weight: 700; font-size: 1rem;">{op}</span>
+                    <span style="color: #070D1B !important; font-weight: 700; font-size: 0.95rem;">{op}</span>
                 </div>
-            """
-            st.markdown(btn_html, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
         else:
-            # Estilo inactivo (fondo oscuro, texto blanco brillante)
+            # Estilo para las pestañas inactivas (botón interactivo en cascada)
             if st.button(op, key=f"nav_btn_{i}", use_container_width=True):
                 st.session_state.active_tab = op
                 st.rerun()
