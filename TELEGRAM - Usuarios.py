@@ -14,60 +14,58 @@ if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usu
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
-# --- CONEXIÓN A BASE DE DATOS ---
-@st.cache_resource
-def get_engine(): 
-    engine_dic = create_engine(
+# --- CONEXIÓN A BASE DE DATOS (TIMEOUTS AMPLIADOS PARA RED MÓVIL) ---
+def crear_nuevo_engine():
+    return create_engine(
         st.secrets["databases"]["url_dic"],
         pool_pre_ping=True, 
         pool_recycle=1800, 
-        pool_timeout=10,
-        connect_args={'connect_timeout': 10}
+        pool_timeout=25,  # Margen amplio para evitar timeouts en celular
+        connect_args={'connect_timeout': 25}
     )
-    return engine_dic
 
-ENGINE_DIC = get_engine()
+# Usamos st.session_state para gestionar el engine y evitar que se quede cacheado en estado roto
+if 'db_engine' not in st.session_state:
+    st.session_state.db_engine = crear_nuevo_engine()
 
-def obtener_datos(query, max_retries=2):
-    """Ejecuta consultas con manejo de errores robusto para redes móviles."""
-    global ENGINE_DIC
+def obtener_datos(query, max_retries=3):
+    """Ejecuta consultas con reconexión automática si falla la red móvil."""
     for intento in range(max_retries):
         try:
-            with ENGINE_DIC.connect() as conn:
+            with st.session_state.db_engine.connect() as conn:
                 return pd.read_sql(query, conn)
         except Exception as e:
             if intento < max_retries - 1:
                 try:
-                    ENGINE_DIC.dispose()
+                    st.session_state.db_engine.dispose()
                 except:
                     pass
-                ENGINE_DIC = get_engine()
-                t.sleep(1)
+                st.session_state.db_engine = crear_nuevo_engine()
+                t.sleep(2)
             else:
-                st.warning("⚠️ No se pudo establecer conexión con el servidor de base de datos de MIAA. Comprueba tu red o VPN.")
+                st.warning(f"⚠️ Error de conexión con MIAA (Intento {intento + 1}): {e}")
                 return pd.DataFrame()
 
-def ejecutar_sql(query, params=None, max_retries=2):
-    """Ejecuta sentencias SQL con control de errores."""
-    global ENGINE_DIC
+def ejecutar_sql(query, params=None, max_retries=3):
+    """Ejecuta sentencias SQL con control de errores y reintentos."""
     for intento in range(max_retries):
         try:
-            with ENGINE_DIC.connect() as conn:
+            with st.session_state.db_engine.connect() as conn:
                 with conn.begin():
                     conn.execute(text(query) if isinstance(query, str) else query, params or {})
             return True
         except Exception as e:
             if intento < max_retries - 1:
                 try:
-                    ENGINE_DIC.dispose()
+                    st.session_state.db_engine.dispose()
                 except:
                     pass
-                ENGINE_DIC = get_engine()
-                t.sleep(1)
+                st.session_state.db_engine = crear_nuevo_engine()
+                t.sleep(2)
             else:
                 raise e
 
-# --- ESTILOS CSS LIMPIOS Y ROBUSTOS ---
+# --- ESTILOS CSS PROFESIONALES ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -155,7 +153,7 @@ with col_title_2:
 # --- CARGA DE DATOS ---
 df_destinatarios = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
 
-# --- MENÚ DE NAVEGACIÓN (3 BOTONES EQUILIBRADOS) ---
+# --- MENÚ DE NAVEGACIÓN (3 BOTONES) ---
 col_b1, col_b2, col_b3 = st.columns(3)
 
 with col_b1:
