@@ -9,7 +9,6 @@ st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegr
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
-if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usuarios"
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
@@ -64,17 +63,38 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* ANular el apilamiento automático de Streamlit en dispositivos móviles o pantallas angostas */
-    [data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: stretch !important;
+    /* ESTILOS PARA LAS PESTAÑAS NATIVAS */
+    [data-testid="stTabs"] {
+        margin-top: 10px;
     }
-    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-        flex: 1 1 0% !important;
-        min-width: 0 !important;
-        width: auto !important;
+    [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: transparent !important;
+    }
+    [data-baseweb="tab"] {
+        background: linear-gradient(135deg, #1A2A56 0%, #162247 100%) !important;
+        border: 1px solid rgba(0, 229, 255, 0.3) !important;
+        border-radius: 8px !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        padding: 10px 20px !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        flex: 1;
+        justify-content: center;
+    }
+    [data-baseweb="tab"]:hover {
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        color: #070D1B !important;
+    }
+    [aria-selected="true"] {
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        border: 1px solid #00E5FF !important;
+        color: #070D1B !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5) !important;
+    }
+    [aria-selected="true"] p {
+        color: #070D1B !important;
+        font-weight: 800 !important;
     }
 
     /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
@@ -152,34 +172,14 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN EN 3 COLUMNAS HORIZONTALES FORZADAS ---
-opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
-cols_menu = st.columns(3)
-
-for i, op in enumerate(opciones_menu):
-    with cols_menu[i]:
-        is_active = (st.session_state.active_tab == op)
-        if is_active:
-            st.markdown(f"""
-                <div style="background: linear-gradient(135deg, #0077B6, #00E5FF); border: 1px solid #00E5FF; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);">
-                    <span style="color: #070D1B !important; font-weight: 700; font-size: 0.95rem; white-space: nowrap;">{op}</span>
-                </div>
-            """, unsafe_allow_html=True)
-        else:
-            if st.button(op, key=f"nav_btn_{i}", use_container_width=True):
-                st.session_state.active_tab = op
-                st.rerun()
-
-# Línea azul brillante pegada justo debajo del menú
-st.markdown("""
-    <div style="margin-top: 10px; margin-bottom: 12px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
-""", unsafe_allow_html=True)
+# --- PESTAÑAS NATIVAS (SE ACOMODAN PERFECTAMENTE EN UNA SOLA FILA) ---
+tab_usuarios, tab_anadir, tab_editar = st.tabs(["👥 Usuarios", "➕ Añadir", "⚙️ Editar"])
 
 # ==========================================
 # SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
-if st.session_state.active_tab == "👥 Usuarios":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">📂 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
+with tab_usuarios:
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.2rem;">📂 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
@@ -206,8 +206,8 @@ if st.session_state.active_tab == "👥 Usuarios":
 # ==========================================
 # SECCIÓN 2: AÑADIR NUEVO
 # ==========================================
-elif st.session_state.active_tab == "➕ Añadir":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
+with tab_anadir:
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.2rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
         f_col1, f_col2, f_col3 = st.columns(3)
@@ -245,8 +245,8 @@ elif st.session_state.active_tab == "➕ Añadir":
 # ==========================================
 # SECCIÓN 3: EDITAR Y ELIMINAR
 # ==========================================
-elif st.session_state.active_tab == "⚙️ Editar":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
+with tab_editar:
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.2rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
