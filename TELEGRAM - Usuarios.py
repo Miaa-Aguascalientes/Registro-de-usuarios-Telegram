@@ -315,7 +315,7 @@ elif st.session_state.active_tab == "⚙️ Editar":
                         actual_val = True if str(row_user['activo']).strip().lower() == 'si' else False
                         edit_activo = st.toggle("Activo / Habilitado", value=actual_val, key=f"toggle_user_{row_user['id']}_{idx}")
                     with sub_col2:
-                        btn_guardar_cambios = st.form_submit_button("💾 Guardar Cambios", use_container_width=True)
+                        btn_guardar_cambios = st.form_submit_button("💾 Guardar cambios", use_container_width=True)
                     with sub_col3:
                         pass # Espacio reservado
                     
@@ -353,7 +353,7 @@ elif st.session_state.active_tab == "⚙️ Editar":
         uid_Target = st.session_state.user_to_delete
         st.markdown(f"""
             <div style="background: linear-gradient(135deg, #3A1C1C 0%, #2A0E0E 100%); border: 1px solid #FF3366; padding: 18px; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 20px rgba(255,51,102,0.3);">
-                <h4 style="color: #FF4D6D; margin-top: 0;">⚠️ Advertencia de Eliminación Permanente</h4>
+                <h4 style="color: #FF4D6D; margin-top: 0;">⚠️ Advertencia de eliminación permanente</h4>
                 <p style="color: #FFFFFF;">Estás a punto de eliminar al usuario con ID: <b>{uid_Target}</b>.</p>
             </div>
         """, unsafe_allow_html=True)
