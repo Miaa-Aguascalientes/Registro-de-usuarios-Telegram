@@ -339,4 +339,4 @@ st.markdown("""
     <div class="footer-miaa">
         🔒 Política de privacidad &nbsp;&bull;&nbsp; © 2026 MIAA. Todos los derechos reservados.
     </div>
-""", unsafe_allow_html=WebResponse := None)
+""", unsafe_allow_html=True)
