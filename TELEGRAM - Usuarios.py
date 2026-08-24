@@ -10,6 +10,7 @@ st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegr
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
+if 'active_tab' not in st.session_state: st.session_state.active_tab = "Usuarios Registrados"
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
@@ -111,6 +112,7 @@ st.write("""<style>
         padding: 0.5rem 1rem;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+        width: 100%;
     }
     .stButton>button:hover {
         background: linear-gradient(135deg, #00E5FF, #90E0EF);
@@ -123,36 +125,6 @@ st.write("""<style>
         border-color: rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
     }
-    
-    /* ELIMINACIÓN COMPLETA DEL RECTÁNGULO / LÍNEA DIVISORIA DE LAS PESTAÑAS */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: transparent !important;
-        margin-bottom: 20px;
-        border-bottom: none !important;
-    }
-    .stTabs [data-baseweb="tab-border"] {
-        display: none !important;
-    }
-    .stTabs div[data-baseweb="tab-list"] ~ div {
-        display: none !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: #162247;
-        border-radius: 10px;
-        color: #8D99AE;
-        font-weight: 600;
-        padding: 12px 24px;
-        border: 1px solid rgba(255,255,255,0.05);
-        transition: all 0.3s ease;
-    }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        color: #070D1B !important;
-        font-weight: 800 !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
-    }
-
     .footer-miaa {
         text-align: center;
         color: #8D99AE;
@@ -163,7 +135,7 @@ st.write("""<style>
     }
 </style>""", unsafe_allow_html=True)
 
-# --- CABECERA: LOGOTIPO MIAA (MÁS CHICO Y ARRIBA) + TÍTULO CON ICONO DE TELEGRAM ---
+# --- CABECERA: LOGOTIPO MIAA + TÍTULO ---
 st.markdown("""
     <div style="text-align: center; margin-bottom: 4px;">
         <img src="https://raw.githubusercontent.com/Miaa-Aguascalientes/Logos/38504978c8f77a4dac38ad476f74dbdee6af2cad/LogoMIAA.svg" 
@@ -188,17 +160,25 @@ try:
 except:
     df_destinatarios = pd.DataFrame()
 
-# --- PESTAÑAS PRINCIPALES ---
-tab_lista, tab_nuevo, tab_editar = st.tabs([
-    "👥 Usuarios Registrados", 
-    "➕ Añadir Nuevo", 
-    "⚙️ Editar y Eliminar"
-])
+# --- SISTEMA DE PESTAÑAS LIMPIO (CON BOTONES PERSONALIZADOS SIN RECTÁNGULOS) ---
+col_tab1, col_tab2, col_tab3, col_tab_space = st.columns([2.5, 2.2, 2.5, 3.8])
+
+with col_tab1:
+    if st.button("👥 Usuarios Registrados", key="btn_tab_1"):
+        st.session_state.active_tab = "Usuarios Registrados"
+with col_tab2:
+    if st.button("➕ Añadir Nuevo", key="btn_tab_2"):
+        st.session_state.active_tab = "Añadir Nuevo"
+with col_tab3:
+    if st.button("⚙️ Editar y Eliminar", key="btn_tab_3"):
+        st.session_state.active_tab = "Editar y Eliminar"
+
+st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 
 # ==========================================
-# PESTAÑA 1: USUARIOS REGISTRADOS
+# CONTENIDO DE LA PESTAÑA 1: USUARIOS REGISTRADOS
 # ==========================================
-with tab_lista:
+if st.session_state.active_tab == "Usuarios Registrados":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
@@ -222,9 +202,9 @@ with tab_lista:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# PESTAÑA 2: AÑADIR NUEVO DESTINATARIO
+# CONTENIDO DE LA PESTAÑA 2: AÑADIR NUEVO
 # ==========================================
-with tab_nuevo:
+elif st.session_state.active_tab == "Añadir Nuevo":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
@@ -262,9 +242,9 @@ with tab_nuevo:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# PESTAÑA 3: EDITAR Y ELIMINAR USUARIOS
+# CONTENIDO DE LA PESTAÑA 3: EDITAR Y ELIMINAR
 # ==========================================
-with tab_editar:
+elif st.session_state.active_tab == "Editar y Eliminar":
     st.markdown('<div class="section-box">', unsafe_allow_html=True)
     st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
