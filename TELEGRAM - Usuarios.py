@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS CORREGIDOS (MENÚ Y FORMULARIOS) ---
+# --- ESTILOS CSS GENERALES ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -64,62 +64,6 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* Contenedor del radio horizontal */
-    div.row-widget.stRadio > div {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        background: rgba(15, 32, 66, 0.8);
-        border: 1px solid rgba(0, 229, 255, 0.2);
-        border-radius: 12px;
-        padding: 5px;
-        gap: 10px;
-    }
-    div.row-widget.stRadio > div > label {
-        background: linear-gradient(135deg, #1A2A56 0%, #162247 100%);
-        border: 1px solid rgba(0, 229, 255, 0.3) !important;
-        border-radius: 8px !important;
-        padding: 8px 18px !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        flex: 1;
-        text-align: center;
-        cursor: pointer;
-    }
-    
-    /* OCULTAR COMPLETAMENTE LOS CÍRCULOS DE LOS RADIO BUTTONS */
-    div.row-widget.stRadio input[type="radio"],
-    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child,
-    div.row-widget.stRadio span[data-baseweb="radio"] {
-        display: none !important;
-    }
-
-    /* FORZAR TEXTO BLANCO BRILLANTE EN LAS OPCIONES DEL MENÚ (NO SELECCIONADAS) */
-    div.row-widget.stRadio div[role="radiogroup"] label span,
-    div.row-widget.stRadio div[role="radiogroup"] label p,
-    div.row-widget.stRadio [data-testid="stMarkdownContainer"] *,
-    div.row-widget.stRadio span {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 600 !important;
-        opacity: 1 !important;
-    }
-
-    /* ESTILO CUANDO LA PESTAÑA ESTÁ SELECCIONADA */
-    div.row-widget.stRadio > div > label[data-checked="true"] {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        border-color: #00E5FF !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
-    }
-    
-    /* TEXTO OSCURO CUANDO LA PESTAÑA ESTÁ ACTIVA (PARA CONTRASTE CON EL FONDO TURQUESA) */
-    div.row-widget.stRadio > div > label[data-checked="true"] span,
-    div.row-widget.stRadio > div > label[data-checked="true"] p,
-    div.row-widget.stRadio > div > label[data-checked="true"] [data-testid="stMarkdownContainer"] * {
-        color: #070D1B !important;
-        -webkit-text-fill-color: #070D1B !important;
-        font-weight: 700 !important;
-    }
-
     /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
     .stTextInput label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stNumberInput label, 
     [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] span, [data-testid="stForm"] label {
@@ -195,24 +139,31 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN HORIZONTAL ---
+# --- MENÚ DE NAVEGACIÓN PERSONALIZADO (BLANCO BRILLANTE Y CONTROL TOTAL) ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
 
-seleccion_tab = st.radio(
-    "Navegación", 
-    options=opciones_menu, 
-    index=opciones_menu.index(st.session_state.active_tab) if st.session_state.active_tab in opciones_menu else 0,
-    horizontal=True,
-    label_visibility="collapsed"
-)
+# Creamos columnas para renderizar los botones de navegación de forma idéntica
+cols_menu = st.columns(len(opciones_menu))
+for i, op in enumerate(opciones_menu):
+    with cols_menu[i]:
+        is_active = (st.session_state.active_tab == op)
+        if is_active:
+            # Estilo activo (fondo turquesa, texto oscuro contrastado)
+            btn_html = f"""
+                <div style="background: linear-gradient(135deg, #0077B6, #00E5FF); border: 1px solid #00E5FF; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);">
+                    <span style="color: #070D1B !important; font-weight: 700; font-size: 1rem;">{op}</span>
+                </div>
+            """
+            st.markdown(btn_html, unsafe_allow_html=True)
+        else:
+            # Estilo inactivo (fondo oscuro, texto blanco brillante)
+            if st.button(op, key=f"nav_btn_{i}", use_container_width=True):
+                st.session_state.active_tab = op
+                st.rerun()
 
-if seleccion_tab != st.session_state.active_tab:
-    st.session_state.active_tab = seleccion_tab
-    st.rerun()
-
-# Línea azul brillante pegada justo debajo de los botones de navegación
+# Línea azul brillante pegada justo debajo del menú
 st.markdown("""
-    <div style="margin-top: 4px; margin-bottom: 12px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
+    <div style="margin-top: 10px; margin-bottom: 12px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
 """, unsafe_allow_html=True)
 
 # ==========================================
