@@ -124,14 +124,18 @@ st.write("""<style>
         border-radius: 8px !important;
     }
     
-    /* Corrección limpia para las pestañas de Streamlit */
+    /* ELIMINACIÓN COMPLETA DEL RECTÁNGULO / LÍNEA DIVISORIA DE LAS PESTAÑAS */
     .stTabs [data-baseweb="tab-list"] {
         gap: 10px;
-        background-color: transparent;
+        background-color: transparent !important;
         margin-bottom: 20px;
+        border-bottom: none !important;
     }
     .stTabs [data-baseweb="tab-border"] {
-        background-color: transparent !important;
+        display: none !important;
+    }
+    .stTabs div[data-baseweb="tab-list"] ~ div {
+        display: none !important;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #162247;
