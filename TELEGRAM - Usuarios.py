@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS CON TEXTOS DE INPUTS EN BLANCO BRILLANTE ---
+# --- ESTILOS CSS CORREGIDOS (MENÚ Y FORMULARIOS) ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -64,7 +64,7 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* Convertir st.radio horizontal en pestañas */
+    /* Contenedor del radio horizontal */
     div.row-widget.stRadio > div {
         display: flex;
         flex-direction: row;
@@ -86,32 +86,32 @@ st.write("""<style>
         cursor: pointer;
     }
     
-    /* OCULTAR COMPLETAMENTE LOS CÍRCULOS NATIVOS DE RADIO */
-    div.row-widget.stRadio input[type="radio"] {
-        display: none !important;
-    }
-    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child {
+    /* OCULTAR COMPLETAMENTE LOS CÍRCULOS DE LOS RADIO BUTTONS */
+    div.row-widget.stRadio input[type="radio"],
+    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child,
+    div.row-widget.stRadio span[data-baseweb="radio"] {
         display: none !important;
     }
 
-    /* FORZAR AZUL TURQUESA EN CUALQUIER ELEMENTO DE TEXTO DENTRO DEL RADIO */
+    /* FORZAR TEXTO BLANCO BRILLANTE EN LAS OPCIONES DEL MENÚ (NO SELECCIONADAS) */
     div.row-widget.stRadio div[role="radiogroup"] label span,
     div.row-widget.stRadio div[role="radiogroup"] label p,
     div.row-widget.stRadio [data-testid="stMarkdownContainer"] *,
     div.row-widget.stRadio span {
-        color: #00E5FF !important;
-        -webkit-text-fill-color: #00E5FF !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         font-weight: 600 !important;
         opacity: 1 !important;
     }
 
+    /* ESTILO CUANDO LA PESTAÑA ESTÁ SELECCIONADA */
     div.row-widget.stRadio > div > label[data-checked="true"] {
         background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
         border-color: #00E5FF !important;
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
     
-    /* Si la pestaña está activa, el texto cambia a color oscuro para contraste perfecto */
+    /* TEXTO OSCURO CUANDO LA PESTAÑA ESTÁ ACTIVA (PARA CONTRASTE CON EL FONDO TURQUESA) */
     div.row-widget.stRadio > div > label[data-checked="true"] span,
     div.row-widget.stRadio > div > label[data-checked="true"] p,
     div.row-widget.stRadio > div > label[data-checked="true"] [data-testid="stMarkdownContainer"] * {
@@ -120,7 +120,7 @@ st.write("""<style>
         font-weight: 700 !important;
     }
 
-    /* FORZAR ETIQUETAS DE INPUTS Y TEXTOS DE FORMULARIOS A BLANCO BRILLANTE */
+    /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
     .stTextInput label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stNumberInput label, 
     [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] span, [data-testid="stForm"] label {
         color: #FFFFFF !important;
