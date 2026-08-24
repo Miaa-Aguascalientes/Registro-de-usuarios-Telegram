@@ -143,18 +143,18 @@ st.write("""<style>
 
 # --- CABECERA ---
 st.markdown("""
-    <div style="text-align: center; margin-bottom: 4px;">
+    <div style="text-align: center; margin-bottom: 2px;">
         <img src="https://raw.githubusercontent.com/Miaa-Aguascalientes/Logos/38504978c8f77a4dac38ad476f74dbdee6af2cad/LogoMIAA.svg" 
-             style="width: 150px; height: auto; display: inline-block; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
+             style="width: 140px; height: auto; display: inline-block; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3));">
     </div>
 """, unsafe_allow_html=True)
 
 col_title_1, col_title_2, col_title_3 = st.columns([1, 6, 1])
 with col_title_2:
     st.markdown("""
-        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1.5rem;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" style="width: 35px; height: 35px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.4));">
-            <h2 style="color: #00E5FF; margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">Gestión de Usuarios</h2>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.5rem;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" style="width: 32px; height: 32px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.4));">
+            <h2 style="color: #00E5FF; margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">Gestión de Usuarios</h2>
         </div>
     """, unsafe_allow_html=True)
 
@@ -173,16 +173,16 @@ if seleccion_tab != st.session_state.active_tab:
     st.session_state.active_tab = seleccion_tab
     st.rerun()
 
-# Línea azul brillante debajo de los botones de navegación
+# Línea azul brillante debajo de los botones de navegación (acercada)
 st.markdown("""
-    <div style="margin-top: 10px; margin-bottom: 25px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
+    <div style="margin-top: 6px; margin-bottom: 18px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
 """, unsafe_allow_html=True)
 
 # ==========================================
 # SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
 if st.session_state.active_tab == "👥 Usuarios":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 5px; font-size: 1.3rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
@@ -210,7 +210,7 @@ if st.session_state.active_tab == "👥 Usuarios":
 # SECCIÓN 2: AÑADIR NUEVO
 # ==========================================
 elif st.session_state.active_tab == "➕ Añadir":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 5px; font-size: 1.3rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
         f_col1, f_col2, f_col3 = st.columns(3)
@@ -249,7 +249,7 @@ elif st.session_state.active_tab == "➕ Añadir":
 # SECCIÓN 3: EDITAR Y ELIMINAR
 # ==========================================
 elif st.session_state.active_tab == "⚙️ Editar":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 5px; font-size: 1.3rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
