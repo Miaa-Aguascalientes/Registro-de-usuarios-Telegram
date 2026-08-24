@@ -94,15 +94,25 @@ st.write("""<style>
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
     
-    /* Forzar que los textos dentro del radio button sean estrictamente blancos brillantes */
+    /* FORZAR BLANCO BRILLANTE ABSOLUTO EN TEXTOS DEL RADIO (Móvil y Escritorio) */
+    div.row-widget.stRadio label,
+    div.row-widget.stRadio label span,
     div.row-widget.stRadio label p,
-    div.row-widget.stRadio span,
-    div.row-widget.stRadio div[data-testid="stMarkdownContainer"] p {
+    div.row-widget.stRadio div,
+    div.row-widget.stRadio [data-testid="stMarkdownContainer"] p {
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
+        opacity: 1 !important;
     }
     
-    /* Ocultar por completo los círculos y contenedores de los inputs nativos de radio */
+    /* Excepción si la pestaña está seleccionada para que el texto haga contraste oscuro si el fondo es brillante */
+    div.row-widget.stRadio > div > label[data-checked="true"] span,
+    div.row-widget.stRadio > div > label[data-checked="true"] p {
+        color: #070D1B !important;
+        -webkit-text-fill-color: #070D1B !important;
+    }
+
+    /* Ocultar por completo los círculos nativos y sus contenedores de los inputs de radio */
     div.row-widget.stRadio input {
         display: none !important;
     }
