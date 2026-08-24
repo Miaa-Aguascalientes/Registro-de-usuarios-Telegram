@@ -259,31 +259,56 @@ elif st.session_state.active_tab == "⚙️ Editar":
         for idx, row_user in df_destinatarios.iterrows():
             with st.container():
                 st.markdown(f"""
-                    <div style="background: linear-gradient(90deg, #162247 0%, #0F1A36 100%); border: 1px solid rgba(0,229,255,0.15); border-radius: 10px; padding: 12px 18px; margin-bottom: 8px;">
-                        <span style="font-weight: bold; color: #FFFFFF; font-size: 1.05rem;">{row_user['nombre']}</span> 
-                        <span style="color: #00E5FF; font-size: 0.85rem; font-family: monospace;">(ID: {row_user['chart_id']})</span>
+                    <div style="background: linear-gradient(90deg, #162247 0%, #0F1A36 100%); border: 1px solid rgba(0,229,255,0.15); border-radius: 10px 10px 0 0; padding: 8px 15px;">
+                        <span style="color: #00E5FF; font-size: 0.85rem; font-family: monospace;">ID Registro BD: <b>{row_user['id']}</b></span>
                     </div>
                 """, unsafe_allow_html=True)
                 
-                cols_u = st.columns([4, 2, 2])
-                with cols_u[0]:
-                    st.markdown(f"<span style='color: #8D99AE; font-size: 0.9rem;'>Depto: <b>{row_user['departamento']}</b></span>", unsafe_allow_html=True)
-                with cols_u[1]:
-                    actual_val = True if str(row_user['activo']).strip().lower() == 'si' else False
-                    nuevo_estado = st.toggle("Activo", value=actual_val, key=f"toggle_user_{row_user['id']}_{idx}")
-                    nuevo_str = "Si" if nuevo_estado else "No"
-                    if nuevo_str != str(row_user['activo']):
+                with st.form(key=f"form_edit_user_{row_user['id']}_{idx}"):
+                    e_col1, e_col2, e_col3 = st.columns([3, 3, 2])
+                    with e_col1:
+                        edit_nombre = st.text_input("Nombre completo", value=str(row_user['nombre']), key=f"edit_nom_{row_user['id']}_{idx}")
+                    with e_col2:
+                        edit_chart = st.text_input("Chart ID (Telegram)", value=str(row_user['chart_id']), key=f"edit_chart_{row_user['id']}_{idx}")
+                    with e_col3:
+                        edit_depto = st.text_input("Departamento", value=str(row_user['departamento']), key=f"edit_depto_{row_user['id']}_{idx}")
+                    
+                    sub_col1, sub_col2, sub_col3 = st.columns([3, 2, 2])
+                    with sub_col1:
+                        actual_val = True if str(row_user['activo']).strip().lower() == 'si' else False
+                        edit_activo = st.toggle("Activo / Habilitado", value=actual_val, key=f"toggle_user_{row_user['id']}_{idx}")
+                    with sub_col2:
+                        btn_guardar_cambios = st.form_submit_button("💾 Guardar Cambios", use_container_width=True)
+                    with sub_col3:
+                        pass # Espacio reservado
+                    
+                    if btn_guardar_cambios:
                         try:
-                            ejecutar_sql("UPDATE Diccionario_telegram SET activo = :val WHERE id = :uid", {"val": nuevo_str, "uid": row_user['id']})
-                            st.toast(f"Actualizado: {row_user['nombre']} -> {nuevo_str}")
+                            nuevo_str_activo = "Si" if edit_activo else "No"
+                            ejecutar_sql(
+                                "UPDATE Diccionario_telegram SET nombre = :nom, chart_id = :ch, departamento = :dep, activo = :act WHERE id = :uid",
+                                {
+                                    "nom": edit_nombre, 
+                                    "ch": edit_chart, 
+                                    "dep": edit_depto, 
+                                    "act": nuevo_str_activo, 
+                                    "uid": row_user['id']
+                                }
+                            )
+                            st.success(f"¡Usuario '{edit_nombre}' actualizado correctamente!")
+                            t.sleep(0.8)
                             st.rerun()
                         except Exception as ex:
-                            st.error(f"Error al actualizar: {ex}")
-                with cols_u[2]:
+                            st.error(f"Error al actualizar el registro: {ex}")
+                
+                # Botón independiente de eliminación fuera del formulario para evitar conflictos
+                del_col1, del_col2 = st.columns([6, 2])
+                with del_col2:
                     if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}", use_container_width=True):
                         st.session_state.user_to_delete = row_user['id']
                         st.rerun()
-                st.markdown("<hr style='border: 0.5px solid rgba(0,229,255,0.1); margin: 12px 0;'>", unsafe_allow_html=True)
+                        
+                st.markdown("<hr style='border: 0.5px solid rgba(0,229,255,0.2); margin: 15px 0;'>", unsafe_allow_html=True)
     else:
         st.info("No hay usuarios disponibles para editar.")
 
