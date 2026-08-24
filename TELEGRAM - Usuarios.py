@@ -10,7 +10,6 @@ st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegr
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
-if 'active_tab' not in st.session_state: st.session_state.active_tab = "Usuarios Registrados"
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
@@ -77,15 +76,43 @@ st.write("""<style>
         background: radial-gradient(circle at top center, #0F2042 0%, #070D1B 70%);
         color: #FFFFFF;
     }
-    .section-box {
-        background: linear-gradient(135deg, rgba(22, 34, 71, 0.8) 0%, rgba(15, 26, 54, 0.9) 100%);
-        border: 1px solid rgba(0, 229, 255, 0.2);
-        border-radius: 16px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(8px);
+    
+    /* Ocultar selector de radio feo y convertirlo en botonera horizontal limpia */
+    div[data-testid="stRadio"] > label {
+        display: none;
     }
+    div[data-testid="stRadio"] [role="radiogroup"] {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 25px;
+    }
+    div[data-testid="stRadio"] [role="radiogroup"] > label {
+        background: linear-gradient(135deg, #162247 0%, #0F1A36 100%);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        border-radius: 10px;
+        padding: 10px 20px;
+        color: #FFFFFF;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+    }
+    div[data-testid="stRadio"] [role="radiogroup"] > label:hover {
+        border-color: #00E5FF;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+    div[data-testid="stRadio"] [role="radiogroup"] input[checked] + div {
+        color: #00E5FF !important;
+    }
+    /* Estilo para marcar el seleccionado activamente */
+    div[data-testid="stRadio"] [role="radiogroup"] label[data-checked="true"],
+    div[data-testid="stRadio"] [role="radiogroup"] input:checked ~ div {
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        color: #070D1B !important;
+    }
+
     .user-card {
         background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
         border: 1px solid rgba(0, 229, 255, 0.15);
@@ -160,27 +187,19 @@ try:
 except:
     df_destinatarios = pd.DataFrame()
 
-# --- SISTEMA DE PESTAÑAS LIMPIO (CON BOTONES PERSONALIZADOS SIN RECTÁNGULOS) ---
-col_tab1, col_tab2, col_tab3, col_tab_space = st.columns([2.5, 2.2, 2.5, 3.8])
-
-with col_tab1:
-    if st.button("👥 Usuarios Registrados", key="btn_tab_1"):
-        st.session_state.active_tab = "Usuarios Registrados"
-with col_tab2:
-    if st.button("➕ Añadir Nuevo", key="btn_tab_2"):
-        st.session_state.active_tab = "Añadir Nuevo"
-with col_tab3:
-    if st.button("⚙️ Editar y Eliminar", key="btn_tab_3"):
-        st.session_state.active_tab = "Editar y Eliminar"
-
-st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
+# --- SISTEMA DE PESTAÑAS HORIZONTALES LIMPIO (SIN RECTÁNGULOS FANTASMA) ---
+active_tab = st.radio(
+    "Navegación",
+    options=["👥 Usuarios Registrados", "➕ Añadir Nuevo", "⚙️ Editar y Eliminar"],
+    horizontal=True,
+    label_visibility="collapsed"
+)
 
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 1: USUARIOS REGISTRADOS
 # ==========================================
-if st.session_state.active_tab == "Usuarios Registrados":
-    st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
+if active_tab == "👥 Usuarios Registrados":
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     if not df_destinatarios.empty:
         for _, row_user in df_destinatarios.iterrows():
@@ -199,14 +218,12 @@ if st.session_state.active_tab == "Usuarios Registrados":
             """, unsafe_allow_html=True)
     else:
         st.info("No se encontraron registros en Diccionario_telegram.")
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 2: AÑADIR NUEVO
 # ==========================================
-elif st.session_state.active_tab == "Añadir Nuevo":
-    st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
+elif active_tab == "➕ Añadir Nuevo":
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
         f_col1, f_col2, f_col3 = st.columns(3)
@@ -239,14 +256,12 @@ elif st.session_state.active_tab == "Añadir Nuevo":
                     st.error(f"Error al insertar el usuario: {ex}")
             else:
                 st.warning("Por favor completa los campos obligatorios (Nombre y Chart ID).")
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 3: EDITAR Y ELIMINAR
 # ==========================================
-elif st.session_state.active_tab == "Editar y Eliminar":
-    st.markdown('<div class="section-box">', unsafe_allow_html=True)
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
+elif active_tab == "⚙️ Editar y Eliminar":
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     if not df_destinatarios.empty:
         for idx, row_user in df_destinatarios.iterrows():
@@ -280,7 +295,7 @@ elif st.session_state.active_tab == "Editar y Eliminar":
     else:
         st.info("No hay usuarios disponibles para editar.")
 
-    # Manejo de confirmación de eliminación con estilo mejorado
+    # Manejo de confirmación de eliminación
     if st.session_state.user_to_delete is not None:
         uid_Target = st.session_state.user_to_delete
         st.markdown(f"""
@@ -310,8 +325,6 @@ elif st.session_state.active_tab == "Editar y Eliminar":
             if st.button("Cancelar", key="btn_cancelar_eliminar_def"):
                 st.session_state.user_to_delete = None
                 st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- PIE DE PÁGINA ---
 st.markdown("""
