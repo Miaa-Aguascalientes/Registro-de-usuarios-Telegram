@@ -9,6 +9,7 @@ st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegr
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
+if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usuarios"
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
@@ -48,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS GENERALES Y MEJORA DE PESTAÑAS ---
+# --- ESTILOS CSS CON TEXTOS DE INPUTS EN BLANCO BRILLANTE ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -63,47 +64,63 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* ESTILOS AVANZADOS PARA LAS PESTAÑAS NATIVAS */
-    [data-testid="stTabs"] {
-        margin-top: 15px;
-    }
-    [data-baseweb="tab-list"] {
-        gap: 12px;
-        background-color: rgba(7, 13, 27, 0.6) !important;
-        padding: 8px !important;
-        border-radius: 12px;
-        border: 1px solid rgba(0, 229, 255, 0.15);
-    }
-    [data-baseweb="tab"] {
-        background: linear-gradient(135deg, #132247 0%, #0A142D 100%) !important;
-        border: 1px solid rgba(0, 229, 255, 0.25) !important;
-        border-radius: 8px !important;
-        color: #B0C4DE !important;
-        font-weight: 700 !important;
-        padding: 12px 24px !important;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        flex: 1;
+    /* Convertir st.radio horizontal en pestañas */
+    div.row-widget.stRadio > div {
+        display: flex;
+        flex-direction: row;
         justify-content: center;
-        transition: all 0.2s ease-in-out;
+        background: rgba(15, 32, 66, 0.8);
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 12px;
+        padding: 5px;
+        gap: 10px;
     }
-    [data-baseweb="tab"]:hover {
-        background: linear-gradient(135deg, #1B365D, #00B4D8) !important;
-        color: #FFFFFF !important;
-        border-color: rgba(0, 229, 255, 0.6) !important;
+    div.row-widget.stRadio > div > label {
+        background: linear-gradient(135deg, #1A2A56 0%, #162247 100%);
+        border: 1px solid rgba(0, 229, 255, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 8px 18px !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        flex: 1;
+        text-align: center;
+        cursor: pointer;
     }
-    [aria-selected="true"] {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        border: 1px solid #00E5FF !important;
-        color: #070D1B !important;
-        box-shadow: 0 0 20px rgba(0, 229, 255, 0.6) !important;
+    
+    /* OCULTAR COMPLETAMENTE LOS CÍRCULOS NATIVOS DE RADIO */
+    div.row-widget.stRadio input[type="radio"] {
+        display: none !important;
     }
-    [aria-selected="true"] p, [aria-selected="true"] span {
-        color: #070D1B !important;
-        font-weight: 800 !important;
-        text-shadow: none !important;
+    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child {
+        display: none !important;
     }
 
-    /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
+    /* FORZAR AZUL TURQUESA EN CUALQUIER ELEMENTO DE TEXTO DENTRO DEL RADIO */
+    div.row-widget.stRadio div[role="radiogroup"] label span,
+    div.row-widget.stRadio div[role="radiogroup"] label p,
+    div.row-widget.stRadio [data-testid="stMarkdownContainer"] *,
+    div.row-widget.stRadio span {
+        color: #00E5FF !important;
+        -webkit-text-fill-color: #00E5FF !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
+    }
+
+    div.row-widget.stRadio > div > label[data-checked="true"] {
+        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
+        border-color: #00E5FF !important;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    }
+    
+    /* Si la pestaña está activa, el texto cambia a color oscuro para contraste perfecto */
+    div.row-widget.stRadio > div > label[data-checked="true"] span,
+    div.row-widget.stRadio > div > label[data-checked="true"] p,
+    div.row-widget.stRadio > div > label[data-checked="true"] [data-testid="stMarkdownContainer"] * {
+        color: #070D1B !important;
+        -webkit-text-fill-color: #070D1B !important;
+        font-weight: 700 !important;
+    }
+
+    /* FORZAR ETIQUETAS DE INPUTS Y TEXTOS DE FORMULARIOS A BLANCO BRILLANTE */
     .stTextInput label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stNumberInput label, 
     [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] span, [data-testid="stForm"] label {
         color: #FFFFFF !important;
@@ -178,14 +195,31 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- PESTAÑAS NATIVAS ALTAMENTE DISTINTIVAS ---
-tab_usuarios, tab_anadir, tab_editar = st.tabs(["👥 Usuarios", "➕ Añadir", "⚙️ Editar"])
+# --- MENÚ DE NAVEGACIÓN HORIZONTAL ---
+opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
+
+seleccion_tab = st.radio(
+    "Navegación", 
+    options=opciones_menu, 
+    index=opciones_menu.index(st.session_state.active_tab) if st.session_state.active_tab in opciones_menu else 0,
+    horizontal=True,
+    label_visibility="collapsed"
+)
+
+if seleccion_tab != st.session_state.active_tab:
+    st.session_state.active_tab = seleccion_tab
+    st.rerun()
+
+# Línea azul brillante pegada justo debajo de los botones de navegación
+st.markdown("""
+    <div style="margin-top: 4px; margin-bottom: 12px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
-with tab_usuarios:
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.2rem;">📂 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
+if st.session_state.active_tab == "👥 Usuarios":
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">📂 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
@@ -212,8 +246,8 @@ with tab_usuarios:
 # ==========================================
 # SECCIÓN 2: AÑADIR NUEVO
 # ==========================================
-with tab_anadir:
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.2rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
+elif st.session_state.active_tab == "➕ Añadir":
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
         f_col1, f_col2, f_col3 = st.columns(3)
@@ -251,8 +285,8 @@ with tab_anadir:
 # ==========================================
 # SECCIÓN 3: EDITAR Y ELIMINAR
 # ==========================================
-with tab_editar:
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.2rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
+elif st.session_state.active_tab == "⚙️ Editar":
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
@@ -283,7 +317,7 @@ with tab_editar:
                     with sub_col2:
                         btn_guardar_cambios = st.form_submit_button("💾 Guardar Cambios", use_container_width=True)
                     with sub_col3:
-                        pass
+                        pass # Espacio reservado
                     
                     if btn_guardar_cambios:
                         try:
@@ -304,6 +338,7 @@ with tab_editar:
                         except Exception as ex:
                             st.error(f"Error al actualizar el registro: {ex}")
                 
+                # Botón independiente de eliminación fuera del formulario para evitar conflictos
                 del_col1, del_col2 = st.columns([6, 2])
                 with del_col2:
                     if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}", use_container_width=True):
