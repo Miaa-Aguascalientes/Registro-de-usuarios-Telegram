@@ -9,7 +9,7 @@ st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegr
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
-if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usuarios Registrados"
+if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usuarios"
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
@@ -160,7 +160,6 @@ with col_title_2:
 # --- MENÚ DE NAVEGACIÓN HORIZONTAL INFALIBLE ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
 
-# Usamos st.radio con horizontal=True para garantizar una única fila horizontal que no se rompe nunca
 seleccion_tab = st.radio(
     "Navegación", 
     options=opciones_menu, 
@@ -178,7 +177,7 @@ st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 # ==========================================
 # SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
-if st.session_state.active_tab == "👥 Usuarios Registrados":
+if st.session_state.active_tab == "👥 Usuarios":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
@@ -206,7 +205,7 @@ if st.session_state.active_tab == "👥 Usuarios Registrados":
 # ==========================================
 # SECCIÓN 2: AÑADIR NUEVO
 # ==========================================
-elif st.session_state.active_tab == "➕ Añadir Nuevo":
+elif st.session_state.active_tab == "➕ Añadir":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
@@ -245,7 +244,7 @@ elif st.session_state.active_tab == "➕ Añadir Nuevo":
 # ==========================================
 # SECCIÓN 3: EDITAR Y ELIMINAR
 # ==========================================
-elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
+elif st.session_state.active_tab == "⚙️ Editar":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
