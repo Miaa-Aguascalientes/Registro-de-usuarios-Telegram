@@ -93,9 +93,18 @@ st.write("""<style>
         border-color: #00E5FF !important;
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
-    /* Ocultar el círculo nativo del radio button */
-    div.row-widget.stRadio input[type="radio"] {
-        display: none;
+    
+    /* Ocultar por completo los círculos de radio nativos de Streamlit para evitar artefactos visuales */
+    div.row-widget.stRadio input[type="radio"],
+    div.row-widget.stRadio div[data-testid="stMarkdownContainer"] p,
+    div.row-widget.stRadio span {
+        /* Permite ocultar inputs nativos de selección sin romper los textos */
+    }
+    div.row-widget.stRadio input {
+        display: none !important;
+    }
+    div.row-widget.stRadio div[role="radiogroup"] > label > div:first-child {
+        display: none !important;
     }
 
     .user-card {
@@ -125,12 +134,19 @@ st.write("""<style>
         background: linear-gradient(135deg, #00E5FF, #90E0EF);
         color: #070D1B;
     }
-    div[data-baseweb="input"] input, div[data-baseweb="base-input"] {
+    
+    /* Forzar texto en blanco brillante absoluto en todos los inputs de texto */
+    div[data-baseweb="input"] input, 
+    div[data-baseweb="base-input"] input, 
+    input[type="text"] {
         background-color: #070D1B !important;
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         border-color: rgba(0, 229, 255, 0.3) !important;
         border-radius: 8px !important;
+        font-weight: 600 !important;
     }
+    
     .footer-miaa {
         text-align: center;
         color: #8D99AE;
