@@ -48,7 +48,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS GENERALES ---
+# --- ESTILOS CSS GENERALES Y MEJORA DE PESTAÑAS ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -63,38 +63,44 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* ESTILOS PARA LAS PESTAÑAS NATIVAS */
+    /* ESTILOS AVANZADOS PARA LAS PESTAÑAS NATIVAS */
     [data-testid="stTabs"] {
-        margin-top: 10px;
+        margin-top: 15px;
     }
     [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: transparent !important;
+        gap: 12px;
+        background-color: rgba(7, 13, 27, 0.6) !important;
+        padding: 8px !important;
+        border-radius: 12px;
+        border: 1px solid rgba(0, 229, 255, 0.15);
     }
     [data-baseweb="tab"] {
-        background: linear-gradient(135deg, #1A2A56 0%, #162247 100%) !important;
-        border: 1px solid rgba(0, 229, 255, 0.3) !important;
+        background: linear-gradient(135deg, #132247 0%, #0A142D 100%) !important;
+        border: 1px solid rgba(0, 229, 255, 0.25) !important;
         border-radius: 8px !important;
-        color: #FFFFFF !important;
+        color: #B0C4DE !important;
         font-weight: 700 !important;
-        padding: 10px 20px !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        padding: 12px 24px !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         flex: 1;
         justify-content: center;
+        transition: all 0.2s ease-in-out;
     }
     [data-baseweb="tab"]:hover {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        color: #070D1B !important;
+        background: linear-gradient(135deg, #1B365D, #00B4D8) !important;
+        color: #FFFFFF !important;
+        border-color: rgba(0, 229, 255, 0.6) !important;
     }
     [aria-selected="true"] {
         background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
         border: 1px solid #00E5FF !important;
         color: #070D1B !important;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.5) !important;
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.6) !important;
     }
-    [aria-selected="true"] p {
+    [aria-selected="true"] p, [aria-selected="true"] span {
         color: #070D1B !important;
         font-weight: 800 !important;
+        text-shadow: none !important;
     }
 
     /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
@@ -172,7 +178,7 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- PESTAÑAS NATIVAS (SE ACOMODAN PERFECTAMENTE EN UNA SOLA FILA) ---
+# --- PESTAÑAS NATIVAS ALTAMENTE DISTINTIVAS ---
 tab_usuarios, tab_anadir, tab_editar = st.tabs(["👥 Usuarios", "➕ Añadir", "⚙️ Editar"])
 
 # ==========================================
