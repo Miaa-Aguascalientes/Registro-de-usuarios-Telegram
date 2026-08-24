@@ -158,7 +158,7 @@ with col_title_2:
     """, unsafe_allow_html=True)
 
 # --- MENÚ DE NAVEGACIÓN HORIZONTAL INFALIBLE ---
-opciones_menu = ["👥 Usuarios Registrados", "➕ Añadir Nuevo", "⚙️ Editar y Eliminar"]
+opciones_menu = ["👥 Usuarios", "➕ Añadir Nuevo", "⚙️ Editar"]
 
 # Usamos st.radio con horizontal=True para garantizar una única fila horizontal que no se rompe nunca
 seleccion_tab = st.radio(
