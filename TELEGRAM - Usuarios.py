@@ -64,6 +64,18 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
+    /* FORZAR QUE LAS 3 COLUMNAS DEL MENÚ SE QUEDEN LADO A LADO EN MÓVIL Y PC */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        width: 33.333% !important;
+        flex: 1 1 33.333% !important;
+        min-width: 0 !important;
+    }
+
     /* ETIQUETAS DE INPUTS Y FORMULARIOS EN BLANCO BRILLANTE */
     .stTextInput label, .stSelectbox label, .stMultiSelect label, .stSlider label, .stNumberInput label, 
     [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] span, [data-testid="stForm"] label {
@@ -139,7 +151,7 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN EN 3 COLUMNAS EXACTAS ---
+# --- MENÚ DE NAVEGACIÓN EN 3 COLUMNAS FORZADAS ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
 cols_menu = st.columns(3)
 
@@ -147,14 +159,12 @@ for i, op in enumerate(opciones_menu):
     with cols_menu[i]:
         is_active = (st.session_state.active_tab == op)
         if is_active:
-            # Estilo para la pestaña seleccionada (activa)
             st.markdown(f"""
                 <div style="background: linear-gradient(135deg, #0077B6, #00E5FF); border: 1px solid #00E5FF; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);">
                     <span style="color: #070D1B !important; font-weight: 700; font-size: 0.95rem;">{op}</span>
                 </div>
             """, unsafe_allow_html=True)
         else:
-            # Estilo para las pestañas inactivas (botón interactivo en cascada)
             if st.button(op, key=f"nav_btn_{i}", use_container_width=True):
                 st.session_state.active_tab = op
                 st.rerun()
@@ -266,7 +276,7 @@ elif st.session_state.active_tab == "⚙️ Editar":
                     with sub_col2:
                         btn_guardar_cambios = st.form_submit_button("💾 Guardar Cambios", use_container_width=True)
                     with sub_col3:
-                        pass # Espacio reservado
+                        pass
                     
                     if btn_guardar_cambios:
                         try:
@@ -287,7 +297,6 @@ elif st.session_state.active_tab == "⚙️ Editar":
                         except Exception as ex:
                             st.error(f"Error al actualizar el registro: {ex}")
                 
-                # Botón independiente de eliminación fuera del formulario para evitar conflictos
                 del_col1, del_col2 = st.columns([6, 2])
                 with del_col2:
                     if st.button("🗑️ Eliminar", key=f"del_user_{row_user['id']}_{idx}", use_container_width=True):
