@@ -93,7 +93,7 @@ st.write("""<style>
         border-color: #00E5FF !important;
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
-    /* Ocultar el círculo nativo feo del radio button */
+    /* Ocultar el círculo nativo del radio button */
     div.row-widget.stRadio input[type="radio"] {
         display: none;
     }
@@ -153,6 +153,7 @@ col_title_1, col_title_2, col_title_3 = st.columns([1, 6, 1])
 with col_title_2:
     st.markdown("""
         <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 1.5rem;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" style="width: 35px; height: 35px; filter: drop-shadow(0 0 6px rgba(0,229,255,0.4));">
             <h2 style="color: #00E5FF; margin: 0; font-size: 1.6rem; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(0,229,255,0.3);">Gestión de Usuarios</h2>
         </div>
     """, unsafe_allow_html=True)
@@ -172,7 +173,10 @@ if seleccion_tab != st.session_state.active_tab:
     st.session_state.active_tab = seleccion_tab
     st.rerun()
 
-st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
+# Línea azul brillante debajo de los botones de navegación
+st.markdown("""
+    <div style="margin-top: 10px; margin-bottom: 25px; height: 2px; background: linear-gradient(90deg, rgba(0,229,255,0) 0%, rgba(0,229,255,0.8) 50%, rgba(0,229,255,0) 100%); box-shadow: 0 0 10px #00E5FF;"></div>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # SECCIÓN 1: USUARIOS REGISTRADOS
