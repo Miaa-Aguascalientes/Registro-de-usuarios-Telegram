@@ -182,7 +182,7 @@ st.markdown("""
 # SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
 if st.session_state.active_tab == "👥 Usuarios":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;"> Listado General de Destinatarios</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">📂 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
