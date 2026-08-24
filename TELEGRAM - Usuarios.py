@@ -19,18 +19,22 @@ zona_mx = ZoneInfo("America/Mexico_City")
 def get_engine(): 
     engine_dic = create_engine(
         st.secrets["databases"]["url_dic"],
-        pool_pre_ping=True, pool_recycle=1800, pool_timeout=30
+        pool_pre_ping=True, 
+        pool_recycle=1800, 
+        pool_timeout=10,
+        connect_args={'connect_timeout': 10}
     )
     return engine_dic
 
 ENGINE_DIC = get_engine()
 
-def obtener_datos(query, max_retries=3):
-    """Ejecuta consultas con reintento automático ante desconexiones."""
+def obtener_datos(query, max_retries=2):
+    """Ejecuta consultas con manejo de errores robusto para redes móviles."""
     global ENGINE_DIC
     for intento in range(max_retries):
         try:
-            return pd.read_sql(query, ENGINE_DIC)
+            with ENGINE_DIC.connect() as conn:
+                return pd.read_sql(query, conn)
         except Exception as e:
             if intento < max_retries - 1:
                 try:
@@ -38,13 +42,13 @@ def obtener_datos(query, max_retries=3):
                 except:
                     pass
                 ENGINE_DIC = get_engine()
-                t.sleep(2)
+                t.sleep(1)
             else:
-                st.error(f"Error de conexión a la base de datos tras varios intentos: {e}")
+                st.warning("⚠️ No se pudo establecer conexión con el servidor de base de datos de MIAA. Comprueba tu red o VPN.")
                 return pd.DataFrame()
 
-def ejecutar_sql(query, params=None, max_retries=3):
-    """Ejecuta sentencias SQL (INSERT/UPDATE/DELETE) con reconexión automática."""
+def ejecutar_sql(query, params=None, max_retries=2):
+    """Ejecuta sentencias SQL con control de errores."""
     global ENGINE_DIC
     for intento in range(max_retries):
         try:
@@ -59,11 +63,11 @@ def ejecutar_sql(query, params=None, max_retries=3):
                 except:
                     pass
                 ENGINE_DIC = get_engine()
-                t.sleep(2)
+                t.sleep(1)
             else:
                 raise e
 
-# --- ESTILOS CSS PROFESIONALES (FORZAR 3 COLUMNAS EN MÓVIL Y PC) ---
+# --- ESTILOS CSS PROFESIONALES (BOTONES MÁS JUNTOS Y COMPACTOS) ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -78,17 +82,19 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* FORZAR QUE LAS 3 COLUMNAS DE LOS BOTONES NUNCA SE APILEN EN CELULAR */
+    /* FORZAR 3 COLUMNAS JUNTAS Y COMPACTAS EN MÓVIL Y PC */
     [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 8px !important;
+        gap: 4px !important; /* Espacio reducido entre columnas */
     }
     [data-testid="stHorizontalBlock"] > [data-testid="column"] {
         width: 33.333% !important;
         flex: 1 1 33.333% !important;
         min-width: 0 !important;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
     }
 
     .user-card {
@@ -114,8 +120,8 @@ st.write("""<style>
         border: none;
         border-radius: 8px;
         font-weight: 700;
-        padding: 0.5rem 0.2rem;
-        font-size: 0.85rem;
+        padding: 0.4rem 0.1rem;
+        font-size: 0.8rem;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         width: 100%;
@@ -164,12 +170,9 @@ with col_title_2:
     """, unsafe_allow_html=True)
 
 # --- CARGA DE DATOS ---
-try:
-    df_destinatarios = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
-except:
-    df_destinatarios = pd.DataFrame()
+df_destinatarios = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
 
-# --- 3 BOTONES EN 3 COLUMNAS FORZADAS (HORIZONTALES EN MÓVIL Y ESCRITORIO) ---
+# --- 3 BOTONES EN 3 COLUMNAS JUNTAS Y COMPACTAS ---
 col_b1, col_b2, col_b3 = st.columns(3)
 
 with col_b1:
@@ -211,7 +214,7 @@ if st.session_state.active_tab == "👥 Usuarios Registrados":
                 </div>
             """, unsafe_allow_html=True)
     else:
-        st.info("No se encontraron registros en Diccionario_telegram.")
+        st.info("No se pudieron cargar los registros de la base de datos.")
 
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 2: AÑADIR NUEVO
@@ -287,7 +290,7 @@ elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
                         st.rerun()
                 st.markdown("<hr style='border: 0.5px solid rgba(0,229,255,0.1); margin: 12px 0;'>", unsafe_allow_html=True)
     else:
-        st.info("No hay usuarios disponibles para editar.")
+        st.info("No hay usuarios disponibles para editar o la conexión está inactiva.")
 
     # Manejo de confirmación de eliminación
     if st.session_state.user_to_delete is not None:
