@@ -219,7 +219,7 @@ st.markdown("""
 # SECCIÓN 1: USUARIOS REGISTRADOS
 # ==========================================
 if st.session_state.active_tab == "👥 Usuarios":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">📂 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">📂 Destinatarios activos </h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
@@ -247,7 +247,7 @@ if st.session_state.active_tab == "👥 Usuarios":
 # SECCIÓN 2: AÑADIR NUEVO
 # ==========================================
 elif st.session_state.active_tab == "➕ Añadir":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">✨ Registrar nuevo destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
         f_col1, f_col2, f_col3 = st.columns(3)
@@ -259,7 +259,7 @@ elif st.session_state.active_tab == "➕ Añadir":
             nuevo_depto = st.text_input("Departamento", key="input_nuevo_depto")
         
         st.markdown("<br>", unsafe_allow_html=True)
-        btn_crear = st.form_submit_button("🚀 Guardar Nuevo Usuario")
+        btn_crear = st.form_submit_button("💾 Guardar nuevo usuario")
         if btn_crear:
             if nuevo_nombre and nuevo_chart:
                 try:
@@ -286,7 +286,7 @@ elif st.session_state.active_tab == "➕ Añadir":
 # SECCIÓN 3: EDITAR Y ELIMINAR
 # ==========================================
 elif st.session_state.active_tab == "⚙️ Editar":
-    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="color: #00E5FF; margin-top: 0px; font-size: 1.2rem;">🛠️ Gestión, estados y eliminación</h3>', unsafe_allow_html=True)
     
     df_destinatarios, error_db = obtener_datos("SELECT id, nombre, chart_id, activo, departamento FROM Diccionario_telegram")
     
