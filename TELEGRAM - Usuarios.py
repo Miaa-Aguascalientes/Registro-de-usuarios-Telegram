@@ -3,6 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine, text
 import time as t
 from zoneinfo import ZoneInfo
+import streamlit.components.v1 as components
 
 # Configuración de página
 st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegram", page_icon="https://www.miaa.mx/favicon.ico")
@@ -49,7 +50,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS ---
+# --- ESTILOS CSS Y JS DE CORRECCIÓN ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -64,7 +65,7 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* Estilo profesional para convertir el radio button en una barra de pestañas horizontales fija */
+    /* Estilo profesional para convertir el radio button en una barra de pestañas horizontales */
     div.row-widget.stRadio > div {
         display: flex;
         flex-direction: row;
@@ -85,33 +86,13 @@ st.write("""<style>
         text-align: center;
         cursor: pointer;
     }
-    
-    /* FORZAR BLANCO PURO EXTREMO EN TODOS LOS TEXTOS DEL MENÚ MÓVIL Y ESCRITORIO */
-    div.row-widget.stRadio label,
-    div.row-widget.stRadio label span,
-    div.row-widget.stRadio label p,
-    div.row-widget.stRadio div,
-    div.row-widget.stRadio [data-testid="stMarkdownContainer"],
-    div.row-widget.stRadio [data-testid="stMarkdownContainer"] p {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        opacity: 1 !important;
-    }
-    
-    /* Estado seleccionado: fondo brillante y texto oscuro de alto contraste */
     div.row-widget.stRadio > div > label[data-checked="true"] {
         background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
         border-color: #00E5FF !important;
         box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
     }
-    div.row-widget.stRadio > div > label[data-checked="true"] span,
-    div.row-widget.stRadio > div > label[data-checked="true"] p,
-    div.row-widget.stRadio > div > label[data-checked="true"] div {
-        color: #070D1B !important;
-        -webkit-text-fill-color: #070D1B !important;
-    }
-
-    /* Ocultar por completo los círculos nativos y contenedores del input */
+    
+    /* Ocultar círculos nativos */
     div.row-widget.stRadio input {
         display: none !important;
     }
@@ -147,7 +128,6 @@ st.write("""<style>
         color: #070D1B;
     }
     
-    /* Forzar texto en blanco brillante absoluto en todos los inputs de texto */
     div[data-baseweb="input"] input, 
     div[data-baseweb="base-input"] input, 
     input[type="text"] {
@@ -169,6 +149,31 @@ st.write("""<style>
     }
 </style>""", unsafe_allow_html=True)
 
+# Script JS para forzar color blanco brillante en los textos del menú móvil sin excepción
+components.html("""
+<script>
+    const doc = window.parent.document;
+    function fixMobileRadioText() {
+        const labels = doc.querySelectorAll('div.row-widget.stRadio label');
+        labels.forEach(label => {
+            const isChecked = label.getAttribute('data-checked') === 'true';
+            const paragraphs = label.querySelectorAll('p, span, div');
+            paragraphs.forEach(el => {
+                el.style.setProperty('opacity', '1', 'important');
+                if (isChecked) {
+                    el.style.setProperty('color', '#070D1B', 'important');
+                    el.style.setProperty('-webkit-text-fill-color', '#070D1B', 'important');
+                } else {
+                    el.style.setProperty('color', '#FFFFFF', 'important');
+                    el.style.setProperty('-webkit-text-fill-color', '#FFFFFF', 'important');
+                }
+            });
+        });
+    }
+    setInterval(fixMobileRadioText, 200);
+</script>
+""", height=0)
+
 # --- CABECERA ---
 st.markdown("""
     <div style="text-align: center; margin-bottom: 0px;">
@@ -186,7 +191,7 @@ with col_title_2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- MENÚ DE NAVEGACIÓN HORIZONTAL INFALIBLE ---
+# --- MENÚ DE NAVEGACIÓN HORIZONTAL ---
 opciones_menu = ["👥 Usuarios", "➕ Añadir", "⚙️ Editar"]
 
 seleccion_tab = st.radio(
