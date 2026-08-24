@@ -10,6 +10,7 @@ st.set_page_config(layout="wide", page_title="Gestión de Destinatarios - Telegr
 
 # --- ESTADO DE SESIÓN ---
 if 'user_to_delete' not in st.session_state: st.session_state.user_to_delete = None
+if 'active_tab' not in st.session_state: st.session_state.active_tab = "👥 Usuarios Registrados"
 
 zona_mx = ZoneInfo("America/Mexico_City")
 
@@ -77,42 +78,6 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
-    /* Ocultar selector de radio feo y convertirlo en botonera horizontal limpia */
-    div[data-testid="stRadio"] > label {
-        display: none;
-    }
-    div[data-testid="stRadio"] [role="radiogroup"] {
-        display: flex;
-        flex-direction: row;
-        gap: 12px;
-        justify-content: center;
-        margin-bottom: 25px;
-    }
-    div[data-testid="stRadio"] [role="radiogroup"] > label {
-        background: linear-gradient(135deg, #162247 0%, #0F1A36 100%);
-        border: 1px solid rgba(0, 229, 255, 0.3);
-        border-radius: 10px;
-        padding: 10px 20px;
-        color: #FFFFFF;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
-    }
-    div[data-testid="stRadio"] [role="radiogroup"] > label:hover {
-        border-color: #00E5FF;
-        box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-    }
-    div[data-testid="stRadio"] [role="radiogroup"] input[checked] + div {
-        color: #00E5FF !important;
-    }
-    /* Estilo para marcar el seleccionado activamente */
-    div[data-testid="stRadio"] [role="radiogroup"] label[data-checked="true"],
-    div[data-testid="stRadio"] [role="radiogroup"] input:checked ~ div {
-        background: linear-gradient(135deg, #0077B6, #00E5FF) !important;
-        color: #070D1B !important;
-    }
-
     .user-card {
         background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
         border: 1px solid rgba(0, 229, 255, 0.15);
@@ -187,18 +152,38 @@ try:
 except:
     df_destinatarios = pd.DataFrame()
 
-# --- SISTEMA DE PESTAÑAS HORIZONTALES LIMPIO (SIN RECTÁNGULOS FANTASMA) ---
-active_tab = st.radio(
-    "Navegación",
-    options=["👥 Usuarios Registrados", "➕ Añadir Nuevo", "⚙️ Editar y Eliminar"],
-    horizontal=True,
-    label_visibility="collapsed"
-)
+# --- 3 BOTONES EN 3 COLUMNAS HORIZONTALES (ESTILO PESTAÑA ACTIVA) ---
+col_b1, col_b2, col_b3 = st.columns(3)
+
+with col_b1:
+    is_active_1 = st.session_state.active_tab == "👥 Usuarios Registrados"
+    bg_1 = "linear-gradient(135deg, #0077B6, #00E5FF)" if is_active_1 else "linear-gradient(135deg, #162247 0%, #0F1A36 100%)"
+    color_1 = "#070D1B" if is_active_1 else "#FFFFFF"
+    
+    if st.button("👥 Usuarios Registrados", key="nav_btn_1"):
+        st.session_state.active_tab = "👥 Usuarios Registrados"
+        st.rerun()
+
+with col_b2:
+    is_active_2 = st.session_state.active_tab == "➕ Añadir Nuevo"
+    
+    if st.button("➕ Añadir Nuevo", key="nav_btn_2"):
+        st.session_state.active_tab = "➕ Añadir Nuevo"
+        st.rerun()
+
+with col_b3:
+    is_active_3 = st.session_state.active_tab == "⚙️ Editar y Eliminar"
+    
+    if st.button("⚙️ Editar y Eliminar", key="nav_btn_3"):
+        st.session_state.active_tab = "⚙️ Editar y Eliminar"
+        st.rerun()
+
+st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 1: USUARIOS REGISTRADOS
 # ==========================================
-if active_tab == "👥 Usuarios Registrados":
+if st.session_state.active_tab == "👥 Usuarios Registrados":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">📊 Listado General de Destinatarios</h3>', unsafe_allow_html=True)
     
     if not df_destinatarios.empty:
@@ -222,7 +207,7 @@ if active_tab == "👥 Usuarios Registrados":
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 2: AÑADIR NUEVO
 # ==========================================
-elif active_tab == "➕ Añadir Nuevo":
+elif st.session_state.active_tab == "➕ Añadir Nuevo":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">✨ Registrar Nuevo Destinatario</h3>', unsafe_allow_html=True)
     
     with st.form("form_nuevo_usuario_dinamico_unico"):
@@ -260,7 +245,7 @@ elif active_tab == "➕ Añadir Nuevo":
 # ==========================================
 # CONTENIDO DE LA PESTAÑA 3: EDITAR Y ELIMINAR
 # ==========================================
-elif active_tab == "⚙️ Editar y Eliminar":
+elif st.session_state.active_tab == "⚙️ Editar y Eliminar":
     st.markdown('<h3 style="color: #00E5FF; margin-top: 10px; font-size: 1.4rem;">🛠️ Gestión, Estados y Eliminación</h3>', unsafe_allow_html=True)
     
     if not df_destinatarios.empty:
