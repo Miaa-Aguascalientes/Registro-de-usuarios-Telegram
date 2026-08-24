@@ -63,7 +63,7 @@ def ejecutar_sql(query, params=None, max_retries=3):
             else:
                 raise e
 
-# --- ESTILOS CSS PROFESIONALES (TEMA OSCURO DINÁMICO MIAA) ---
+# --- ESTILOS CSS PROFESIONALES (FORZAR 3 COLUMNAS EN MÓVIL Y PC) ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -78,6 +78,19 @@ st.write("""<style>
         color: #FFFFFF;
     }
     
+    /* FORZAR QUE LAS 3 COLUMNAS DE LOS BOTONES NUNCA SE APILEN EN CELULAR */
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        width: 33.333% !important;
+        flex: 1 1 33.333% !important;
+        min-width: 0 !important;
+    }
+
     .user-card {
         background: linear-gradient(90deg, #1A2A56 0%, #162247 100%);
         border: 1px solid rgba(0, 229, 255, 0.15);
@@ -101,10 +114,14 @@ st.write("""<style>
         border: none;
         border-radius: 8px;
         font-weight: 700;
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 0.2rem;
+        font-size: 0.85rem;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .stButton>button:hover {
         background: linear-gradient(135deg, #00E5FF, #90E0EF);
@@ -152,29 +169,21 @@ try:
 except:
     df_destinatarios = pd.DataFrame()
 
-# --- 3 BOTONES EN 3 COLUMNAS HORIZONTALES (ESTILO PESTAÑA ACTIVA) ---
+# --- 3 BOTONES EN 3 COLUMNAS FORZADAS (HORIZONTALES EN MÓVIL Y ESCRITORIO) ---
 col_b1, col_b2, col_b3 = st.columns(3)
 
 with col_b1:
-    is_active_1 = st.session_state.active_tab == "👥 Usuarios Registrados"
-    bg_1 = "linear-gradient(135deg, #0077B6, #00E5FF)" if is_active_1 else "linear-gradient(135deg, #162247 0%, #0F1A36 100%)"
-    color_1 = "#070D1B" if is_active_1 else "#FFFFFF"
-    
-    if st.button("👥 Usuarios Registrados", key="nav_btn_1"):
+    if st.button("👥 U. Registrados", key="nav_btn_1"):
         st.session_state.active_tab = "👥 Usuarios Registrados"
         st.rerun()
 
 with col_b2:
-    is_active_2 = st.session_state.active_tab == "➕ Añadir Nuevo"
-    
-    if st.button("➕ Añadir Nuevo", key="nav_btn_2"):
+    if st.button("➕ Añadir", key="nav_btn_2"):
         st.session_state.active_tab = "➕ Añadir Nuevo"
         st.rerun()
 
 with col_b3:
-    is_active_3 = st.session_state.active_tab == "⚙️ Editar y Eliminar"
-    
-    if st.button("⚙️ Editar y Eliminar", key="nav_btn_3"):
+    if st.button("⚙️ Editar/Elim.", key="nav_btn_3"):
         st.session_state.active_tab = "⚙️ Editar y Eliminar"
         st.rerun()
 
