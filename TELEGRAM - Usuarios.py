@@ -49,7 +49,7 @@ def ejecutar_sql(query, params=None):
             conn.execute(text(query) if isinstance(query, str) else query, params or {})
     return True
 
-# --- ESTILOS CSS CORREGIDOS ---
+# --- ESTILOS CSS CON TEXTOS EN AZUL TURQUESA ---
 st.write("""<style>
     #MainMenu, header {visibility: hidden;} 
     .block-container {
@@ -94,10 +94,10 @@ st.write("""<style>
         display: none !important;
     }
 
-    /* FORZAR TEXTO BLANCO Y BRILLANTE EN LOS PÁRRAFOS Y CONTENEDORES DE ST.RADIO */
+    /* FORZAR TEXTO AZUL TURQUESA EN LOS PÁRRAFOS Y CONTENEDORES DE ST.RADIO */
     div.row-widget.stRadio [data-testid="stMarkdownContainer"] p {
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
+        color: #00E5FF !important;
+        -webkit-text-fill-color: #00E5FF !important;
         font-weight: 600 !important;
         opacity: 1 !important;
     }
